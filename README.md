@@ -5,6 +5,7 @@ Unity playground for voxel world generation / rendering.
 ## Environments
 Only tested under:  
 * Unity 2020.1.6f1 Windows 10
+* 3950X / RTX 2080s
 * DirectX 11  
 
 It probably won't work (efficiently) for Graphics APIs other than DX11 ...
