@@ -1,0 +1,103 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+StructuredBuffer<int> chkBuf;
+RWStructuredBuffer<unsigned int> blkBuf;
+
+#define EPSILON 0.01
+#define MAX_ITERATIONS 100.0
+#define FAR_PLANE 10000.0
+
+float mod289(float x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+float4 mod289(float4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+float4 perm(float4 x) { return mod289(((x * 34.0) + 1.0) * x); }
+float noise(float3 p)
+{
+	float3 a = floor(p);
+	float3 d = p - a;
+	d = d * d * (3.0 - 2.0 * d);
+	float4 b = a.xxyy + float4(0.0, 1.0, 0.0, 1.0);
+	float4 k1 = perm(b.xyxy);
+	float4 k2 = perm(k1.xyxy + b.zzww);
+	float4 c = k2 + a.zzzz;
+	float4 k3 = perm(c);
+	float4 k4 = perm(c + 1.0);
+	float4 o1 = frac(k3 * (1.0 / 41.0));
+	float4 o2 = frac(k4 * (1.0 / 41.0));
+	float4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+	float2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+	return o4.y * d.y + o4.x * (1.0 - d.y);
+}
+
+float NoiseSDF(float3 ray)
+{
+	float n = 0.0;
+	for (int i = 0; i < 5; i++)
+	{
+		n += noise(pow(2.0, float(i)) * ray) / pow(2.0, float(i) + 1.0);
+	}
+	return (2.0 * n - 0.75);
+}
+
+// Voronoi from https://www.shadertoy.com/view/XtyGzc
+
+// Draw the object on the repeat tile. In this case, a sphere. The result it squared, but that can
+// be taken into account after obtaining the minimum. See below.
+float drawObject(float3 p) { p = frac(p) - .5; return dot(p, p); }
+
+// Repeat cellular tile routine. The operation count is extremely low when compared to conventional
+// methods. No loops, no flooring, no hash calls, etc. Conceptually speaking, this is the fastest way 
+// to produce a reasonable 3D cellular pattern... Although, there's one with three objects and no 
+// rotation, but quality really suffers at that point. 
+float cellTile(float3 p) {
+
+	// Draw four overlapping objects (spheres, in this case) at various positions throughout the tile.
+	float4 d;
+	d.x = drawObject(p - float3(.81, .62, .53));
+	p.xy = float2(p.y - p.x, p.y + p.x) * .7071;
+	d.y = drawObject(p - float3(.39, .2, .11));
+	p.yz = float2(p.z - p.y, p.z + p.y) * .7071;
+	d.z = drawObject(p - float3(.62, .24, .06));
+	p.xz = float2(p.z - p.x, p.z + p.x) * .7071;
+	d.w = drawObject(p - float3(.2, .82, .64));
+
+	// Obtain the minimum, and you're done.
+	d.xy = min(d.xz, d.yw);
+
+	return min(d.x, d.y) * 2.66; // Scale between zero and one... roughly.
+}
+
+// Convert a float4 color to uint ID
+unsigned int ToID(float4 color)
+{
+	return
+		((unsigned int)(clamp(color.r, 0, 1) * 255) << 24) +
+		((unsigned int)(clamp(color.g, 0, 1) * 255) << 16) +
+		((unsigned int)(clamp(color.b, 0, 1) * 255) << 8) +
+		((unsigned int)(clamp(color.a, 0, 1) * 255) << 0);
+}
+
+[numthreads(8,8,8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	int chkID = id.x / 32;
+	int dest = chkID * 32768 + (id.x % 32) * 1024 + id.y * 32 + id.z;
+
+	float3 pos = float3(int(id.x % 32) + chkBuf[chkID * 3 + 0], int(id.y) + chkBuf[chkID * 3 + 1], int(id.z) + chkBuf[chkID * 3 + 2]);
+	//pos = abs(pos);
+
+	// Generate the terrain by SDF ( negative "density" ); actually the distance to nearest surface.
+	float sdf = NoiseSDF(pos / 100.0);
+	sdf += (pos.y - 24) * 0.005 + max(pos.y - 24, 10) * 0.005; // More ground, less sky
+	sdf += 0.3 * (.5 - cellTile(pos / 50.0)); // Apply "a cheap Voronoi" to stylize the terrain
+
+	float4 col = float4(0, 0, 0, 0);
+
+	if (sdf < 0)
+	{
+		// A ugly color from noise
+		col = lerp(float4(0.1,0.1,0.1, 1), float4(0.4,0.4,0.4, 1), clamp(NoiseSDF(pos / 3.0 + float3(1.2345, -6.1237, 0.1246)) * 1 + 0.5, 0, 1));
+	}
+
+	blkBuf[dest] = ToID(col);
+}

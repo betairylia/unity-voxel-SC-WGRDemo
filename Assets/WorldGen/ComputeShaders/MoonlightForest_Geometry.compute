@@ -1,0 +1,62 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#include "includes/noise.cginc"
+#include "includes/utils.cginc"
+
+StructuredBuffer<int> chkBuf;
+RWStructuredBuffer<unsigned int> blkBuf;
+
+float EvalGeometry(float3 pos, out float height, inout uint blk)
+{
+    //float4 color = float4(0, 0, 0, 1); // ground color
+    float4 color = float4(0.729, 0.518, 0.282, 1); // ground color
+
+    height = fbm_9(pos.xz / 100.0) * 0.5 + 0.5; // 0 ~ 1
+    
+    // Scale
+    height = (height * 45.0 - 15.0);
+    //height = (height * 150.0 - 50.0);
+
+    // Distance
+    float sdf = pos.y - height;
+
+    if (sdf < 0)
+    {
+        // Ground color
+        blk = ToID(color);
+    }
+
+    return sdf;
+}
+
+[numthreads(8,8,8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	int chkID = id.x / 32;
+	int dest = chkID * 32768 + (id.x % 32) * 1024 + id.y * 32 + id.z;
+
+	float3 pos = float3(int(id.x % 32) + chkBuf[chkID * 3 + 0], int(id.y) + chkBuf[chkID * 3 + 1], int(id.z) + chkBuf[chkID * 3 + 2]);
+
+    float height;
+    uint blk = 0;
+
+    float sdf = EvalGeometry(pos, height, blk);
+    //float eco = BallEcoSystem(pos, height, blk);
+
+	//float4 col = float4(0, 0, 0, 0);
+
+
+	//if (min(eco, sdf) < 0)
+	//{
+	//	// A ugly color from noise
+	//	//col = lerp(float4(0.1,0.1,0.1, 1), float4(0.4,0.4,0.4, 1), clamp(NoiseSDF(pos / 3.0 + float3(1.2345, -6.1237, 0.1246)) * 1 + 0.5, 0, 1));
+ //       col = float4(0.729, 0.518, 0.282, 1);
+ //       if (eco < sdf)
+ //       {
+ //           col = float4(0.255, 0.665, 0.165, 1);
+ //       }
+ //   }
+
+	blkBuf[dest] = blk;
+}
