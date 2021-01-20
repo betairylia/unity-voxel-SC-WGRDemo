@@ -3,8 +3,9 @@ Unity playground for voxel world generation / rendering.
 (Early development xD)
 
 ## Environments
-Only tested under:  
-* Unity 2020.1.6f1 Windows 10
+Only tested under:
+* Windows 10
+* Unity 2020.1.6f1
 * 3950X / RTX 2080s
 * DirectX 11  
 
