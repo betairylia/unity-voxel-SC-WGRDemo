@@ -2,7 +2,8 @@
 Unity playground for voxel world generation / rendering.  
 (Early development xD)
 
-![demo img](https://i.imgur.com/KRYmRnl.png)
+![demo img](https://i.imgur.com/tBCjE7o.png)
+![demo img2](https://i.imgur.com/KRYmRnl.png)
 
 ## Environments
 Only tested under:
