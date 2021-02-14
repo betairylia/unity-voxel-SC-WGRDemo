@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Custom_SketchPreview
+  m_Shader: {fileID: 4800000, guid: a679d458f6bef364abe1607dd63d66ce, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Control:
+        m_Texture: {fileID: 10307, guid: 0000000000000000f000000000000000, type: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Splat0:
+        m_Texture: {fileID: 2800000, guid: cf42365cfd5d63c4d910c82054c496de, type: 3}
+        m_Scale: {x: 100, y: 100}
+        m_Offset: {x: 0, y: 0}
+    - _Splat1:
+        m_Texture: {fileID: 2800000, guid: 2084819562c5b1548a88c2cc0e66ad48, type: 3}
+        m_Scale: {x: 100, y: 100}
+        m_Offset: {x: 0, y: 0}
+    - _Splat2:
+        m_Texture: {fileID: 2800000, guid: 0f10599cd92d9804a96137c44c60d525, type: 3}
+        m_Scale: {x: 100, y: 100}
+        m_Offset: {x: 0, y: 0}
+    - _Splat3:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _Glossiness: 4.66
+    - _RimAmount: 0.653
+    - _RimThreshold: 0
+    m_Colors:
+    - _AmbientColor: {r: 0.28284273, g: 0.28284273, b: 0.28284273, a: 1}
+    - _Color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    - _RimColor: {r: 0.70710677, g: 0.70710677, b: 0.70710677, a: 1}
+    - _SpecularColor: {r: 0.4509804, g: 0.4509804, b: 0.4509804, a: 1}
+  m_BuildTextureStacks: []

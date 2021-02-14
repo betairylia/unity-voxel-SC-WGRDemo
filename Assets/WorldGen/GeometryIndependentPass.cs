@@ -19,10 +19,9 @@ namespace WorldGen
 
         public virtual void OnGPUFinish(Unity.Collections.NativeArray<uint> buf)
         {
+            chunk._geometry_pass_ok = true;
             base.OnGPUFinish();
             chunk.GetCSGeneration(buf);
-
-            chunk._geometry_pass_ok = true;
         }
 
         protected override bool AlreadyFinished()
@@ -67,7 +66,7 @@ namespace WorldGen
 
         static bool blkBufOK = false, strBufOK = false, strlenBufOK = false;
 
-        static Unity.Collections.NativeArray<StructureSeedDescriptor> host_descriptors;
+        static StructureSeedDescriptor[] host_descriptors = new StructureSeedDescriptor[cs_generation_batchsize * MAX_STRUCTURES_PER_CHUNK];
 
         /// <summary>
         /// Submit a pass for batched GPU exec.
@@ -78,7 +77,7 @@ namespace WorldGen
             CSGenerationQueue.AddLast(pass);
         }
 
-        public static void Init()
+        public static void Init(World world)
         {
             CSGenerationQueue = new LinkedList<GeometryIndependentPass>();
 
@@ -90,6 +89,7 @@ namespace WorldGen
             cs_generation.SetBuffer(0, "chkBuf", csgen_chkBuf);
             cs_generation.SetBuffer(0, "blkBuf", csgen_blkBuf);
             cs_generation.SetBuffer(0, "structureBuf", csgen_structureBuf);
+            cs_generation.SetTexture(0, "Sketch", world.sketchMapTex);
 
             blkBufOK = false;
             strBufOK = false;
@@ -139,19 +139,20 @@ namespace WorldGen
                 csgen_structureBuf.SetCounterValue(0);
 
                 // Run
-                cs_generation.Dispatch(0, 4 * cs_generation_batchsize, 4, 4);
+                cs_generation.Dispatch(0, 4 * _count, 4, 4);
+                //cs_generation.Dispatch(0, 4 * cs_generation_batchsize, 4, 4);
                 ComputeBuffer.CopyCount(csgen_structureBuf, csgen_structureCountBuf, 0);
-
-                // Wait for readback
-                UnityEngine.Rendering.AsyncGPUReadback.Request(csgen_blkBuf, batched_OnGPUComplete);
-                UnityEngine.Rendering.AsyncGPUReadback.Request(csgen_structureBuf, batched_OnGPUComplete_structure);
-                UnityEngine.Rendering.AsyncGPUReadback.Request(csgen_structureCountBuf, batched_OnGPUComplete_structureCount);
 
                 // Set flags for reading back
                 blkBufOK = false;
                 strBufOK = false;
                 strlenBufOK = false;
                 csgen_readingBack = true;
+
+                // Wait for readback
+                UnityEngine.Rendering.AsyncGPUReadback.Request(csgen_blkBuf, batched_OnGPUComplete);
+                UnityEngine.Rendering.AsyncGPUReadback.Request(csgen_structureBuf, batched_OnGPUComplete_structure);
+                UnityEngine.Rendering.AsyncGPUReadback.Request(csgen_structureCountBuf, batched_OnGPUComplete_structureCount);
             }
         }
 
@@ -188,7 +189,7 @@ namespace WorldGen
                 return;
             }
 
-            host_descriptors = request.GetData<StructureSeedDescriptor>();
+            request.GetData<StructureSeedDescriptor>().CopyTo(host_descriptors);
             strBufOK = true;
 
             if (blkBufOK && strBufOK && strlenBufOK)
@@ -206,7 +207,7 @@ namespace WorldGen
                 return;
             }
 
-            Debug.Log($"Structure length: {request.GetData<uint>()[0]}");
+            //Debug.Log($"Structure length: {request.GetData<uint>()[0]}");
             host_csgen_structureCount = request.GetData<uint>()[0];
 
             strlenBufOK = true;

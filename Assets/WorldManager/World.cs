@@ -8,6 +8,7 @@ using System;
 using Unity.Jobs;
 using UnityEngine.Rendering;
 
+// TODO: Refactor for editor usage
 public class World : MonoBehaviour
 {
     static List<World> allGeneators = new List<World>();
@@ -28,12 +29,12 @@ public class World : MonoBehaviour
     public float maxCoroutineSpendPerFrameMS = 1.0f;
 
     public TMPro.TextMeshProUGUI debugText;
-    Coroutine worldGeneratingCoroutine;
+    protected Coroutine worldGeneratingCoroutine;
     bool worldGenerationCRInProgress;
 
     [Inherits(typeof(ChunkGenerator))]
     public TypeReference generatorType;
-    ChunkGenerator chunkGenerator;
+    protected ChunkGenerator chunkGenerator;
 
     public Material chunkMat;
     public ComputeShader cs_chunkMeshPopulator;
@@ -50,6 +51,47 @@ public class World : MonoBehaviour
     public bool viewCull = true;
     public bool fog = false;
     public Color fogColor;
+
+    // World Sketch stuffs
+    [HideInInspector]
+    public bool isSketchReady { get; private set; }
+
+    [HideInInspector]
+    public float[] heightMap;
+    
+    [HideInInspector]
+    public int mapLen;
+
+    [Header("Erosion Settings")]
+    public ComputeShader erosion_cs;
+
+    [Header("World Sketch Preview")]
+    public Texture2D sketchMapTex;
+    public UnityEngine.UI.RawImage sketchMinimap;
+    public int minimapSize = 300;
+    public RectTransform playerPointer;
+
+    public bool showSketchMesh = true;
+    public Material sketchMeshMat;
+
+    const int worldSketchSize = 1024;
+
+    public Matryoshka.MatryoshkaGraph matryoshkaGraph;
+
+    [EnumNamedArray(typeof(WorldGen.StructureType))]
+    public Matryoshka.MatryoshkaGraph[] structureGraphs = new Matryoshka.MatryoshkaGraph[8];
+
+    enum WorldUpdateStage
+    {
+        BUILD_TASKS = 0,
+        REFRESH_RENDERABLES = 1,
+    }
+    WorldUpdateStage currentWorldUpdateStage;
+    string[] _worldUpdateStageStr = new string[]
+    {
+        "Build tasks",
+        "Refresh renderables"
+    };
 
     // Start is called before the first frame update
     void Start()
@@ -72,11 +114,14 @@ public class World : MonoBehaviour
         SetWorld();
     }
 
-    void SetWorld()
+    protected virtual void SetWorld()
     {
+        // Do world sketch
+        SketchWorld();
+
         // Setup generators
         chunkGenerator = (ChunkGenerator)System.Activator.CreateInstance(generatorType);
-        UpdateMgr.Init(cs_generation, cs_generation_batchsize);
+        UpdateMgr.Init(this, cs_generation, cs_generation_batchsize);
 
         for (int i = 0; i < 0; i++)
         //for (int i = 0; i < 64; i++)
@@ -89,6 +134,132 @@ public class World : MonoBehaviour
         //CreateStructure(new BoundsInt(143, 0, 177, 140, 120, 140), new TestTree());
 
         worldGeneratingCoroutine = StartCoroutine(WorldUpdateCoroutine());
+    }
+
+    private void SketchWorld(int seed = -1)
+    {
+        mapLen = worldSketchSize;
+        heightMap = new float[worldSketchSize * worldSketchSize];
+        float[] erosionMap = new float[worldSketchSize * worldSketchSize];
+        float[] waterMap = new float[worldSketchSize * worldSketchSize];
+
+        // Setup computeshaders
+        HydraulicErosionGPU.erosion = erosion_cs;
+
+        // Generate height maps
+        WorldGen.WorldSketch.SillyRiverPlains.FillHeightmap(ref heightMap, ref erosionMap, ref waterMap, worldSketchSize, worldSketchSize);
+
+        // Create texture
+        sketchMapTex = new Texture2D(worldSketchSize, worldSketchSize, TextureFormat.RGBAFloat, false);
+        
+        for(int i = 0; i < worldSketchSize; i++)
+        {
+            for(int j = 0; j < worldSketchSize; j++)
+            {
+                sketchMapTex.SetPixel(i, j, new Color(heightMap[i * mapLen + j], erosionMap[i * mapLen + j], waterMap[i * mapLen + j], 0.0f));
+            }
+        }
+
+        sketchMapTex.Apply();
+
+        if(sketchMinimap)
+        {
+            sketchMinimap.texture = sketchMapTex;
+            sketchMinimap.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, minimapSize);
+            sketchMinimap.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, minimapSize);
+        }
+
+        if(showSketchMesh)
+        {
+            ShowSketchMesh();
+        }
+    }
+
+    int sketchMeshSize = 256;
+    float sketchScale = 4.0f;
+
+    Vector3 GetHeightmapPoint(float uvx, float uvy)
+    {
+        float h = sketchMapTex.GetPixelBilinear(uvx, uvy).r;
+        return new Vector3(
+            (uvx - 0.5f) * worldSketchSize * sketchScale,
+            h * 256.0f,
+            (uvy - 0.5f) * worldSketchSize * sketchScale
+            );
+    }
+
+    private void ShowSketchMesh()
+    {
+        GameObject obj = new GameObject("SketchMesh");
+        obj.transform.parent = this.transform;
+        obj.transform.position = Vector3.zero;
+        obj.AddComponent<MeshFilter>();
+        obj.AddComponent<MeshRenderer>();
+     
+        Mesh mesh = new Mesh();
+        obj.GetComponent<MeshFilter>().mesh = mesh;
+        obj.GetComponent<MeshRenderer>().material = new Material(sketchMeshMat);
+        obj.GetComponent<MeshRenderer>().material.SetTexture("_Control", sketchMapTex);
+        obj.GetComponent<MeshRenderer>().shadowCastingMode = ShadowCastingMode.Off;
+        obj.GetComponent<MeshRenderer>().receiveShadows = true;
+
+        Vector3[] vert = new Vector3[(sketchMeshSize) * (sketchMeshSize)];
+        Vector3[] normal = new Vector3[(sketchMeshSize) * (sketchMeshSize)];
+        Vector2[] uv = new Vector2[(sketchMeshSize) * (sketchMeshSize)];
+        int[] triangles = new int[6 * (sketchMeshSize - 1) * (sketchMeshSize - 1)];
+
+        for(int i = 0; i < sketchMeshSize; i++)
+        {
+            for (int j = 0; j < sketchMeshSize; j++)
+            {
+                vert[i * sketchMeshSize + j] = GetHeightmapPoint((float)i / sketchMeshSize, (float)j / sketchMeshSize);
+
+                // Normal calculation
+                Vector3 xx = new Vector3(0, 0, 0), zz = new Vector3(0, 0, 0);
+                
+                if(j > 0) 
+                {
+                    zz += GetHeightmapPoint((float)(i) / sketchMeshSize, (float)(j) / sketchMeshSize) - GetHeightmapPoint((float)(i) / sketchMeshSize, (float)(j - 1) / sketchMeshSize);
+                }
+                if (j < sketchMeshSize - 1)
+                {
+                    zz += GetHeightmapPoint((float)(i) / sketchMeshSize, (float)(j + 1) / sketchMeshSize) - GetHeightmapPoint((float)(i) / sketchMeshSize, (float)(j) / sketchMeshSize);
+                }
+                if (i > 0)
+                {
+                    xx += GetHeightmapPoint((float)(i) / sketchMeshSize, (float)(j) / sketchMeshSize) - GetHeightmapPoint((float)(i - 1) / sketchMeshSize, (float)(j) / sketchMeshSize);
+                }
+                if (i < sketchMeshSize - 1)
+                {
+                    xx += GetHeightmapPoint((float)(i + 1) / sketchMeshSize, (float)(j) / sketchMeshSize) - GetHeightmapPoint((float)(i) / sketchMeshSize, (float)(j) / sketchMeshSize);
+                }
+
+                Vector3 yy = Vector3.Cross(zz, xx);
+                yy = yy.normalized;
+
+                normal[i * sketchMeshSize + j] = yy;
+
+                uv[i * sketchMeshSize + j] = new Vector2((float)i / sketchMeshSize, (float)j / sketchMeshSize);
+
+                if (i > 0 && j > 0)
+                {
+                    int s = (i - 1) * (sketchMeshSize - 1) + j - 1;
+                    s *= 6;
+
+                    triangles[s + 0] = (i - 1) * sketchMeshSize + (j - 1);
+                    triangles[s + 1] = (i - 1) * sketchMeshSize + (j - 0);
+                    triangles[s + 2] = (i - 0) * sketchMeshSize + (j - 1);
+                    triangles[s + 3] = (i - 1) * sketchMeshSize + (j - 0);
+                    triangles[s + 4] = (i - 0) * sketchMeshSize + (j - 0);
+                    triangles[s + 5] = (i - 0) * sketchMeshSize + (j - 1);
+                }
+            }
+        }
+
+        mesh.vertices = vert;
+        mesh.normals = normal;
+        mesh.uv = uv;
+        mesh.triangles = triangles;
     }
 
     // Update is called once per frame
@@ -106,14 +277,22 @@ public class World : MonoBehaviour
         }
 
         // SUPER HEAVY - FIXME: Optimize it orz
-        RefreshRenderables();
+        //RefreshRenderables();
         UpdateMgr.Update();
         if (debugText != null)
         {
+            // Get renderable size
+            uint vCount = 0;
+            foreach (var r in renderables)
+            {
+                vCount += r.vCount;
+            }
+
             debugText.text = $"" +
                 $"CHUNKS:\n" +
                 $"Loaded:   {chunks.Count} ({chunks.Count * sizeof(uint) * 32 / 1024} MB)\n" +
-                $"Rendered: {renderables.Count} ({renderables.Count * System.Runtime.InteropServices.Marshal.SizeOf(typeof(ChunkRenderer.Vertex)) * (65536.0f / 1024.0f / 1024.0f)} MB)\n" +
+                $"Rendered: {renderables.Count} ({(vCount / 1024.0f) * System.Runtime.InteropServices.Marshal.SizeOf(typeof(ChunkRenderer.Vertex)) / 1024.0f} MB)\n" +
+                $"          {vCount} verts\n" +
                 $"\n" +
                 $"@ {(int)follows.position.x}, {(int)follows.position.y}, {(int)follows.position.z}\n" +
                 $"\n" +
@@ -124,7 +303,13 @@ public class World : MonoBehaviour
                 $"Jobs:\n" +
                 $"Total  Queued {CustomJobs.CustomJob.Count}\n" +
                 $"Unique Queued {CustomJobs.CustomJob.queuedUniqueJobs.Count}\n" +
-                $"Scheduled     {CustomJobs.CustomJob.scheduledJobs.Count}";
+                $"Scheduled     {CustomJobs.CustomJob.scheduledJobs.Count}\n" +
+                $"\n" +
+                $"Loop stage:\n" +
+                $"{_worldUpdateStageStr[(int)currentWorldUpdateStage]}\n" +
+                $"{Matryoshka.Utils.NoisePools.OS2S_FBm_3oct_f0_1.instances.Count}\n" +
+                $"\n" +
+                $"[C] - Toggle freeview";
         }
 
         CoroutineStartTime = Time.realtimeSinceStartup;
@@ -135,6 +320,16 @@ public class World : MonoBehaviour
 
         groundPlane.position = new Vector3(follows.position.x, waterHeight, follows.position.z);
         capPlane.position = new Vector3(follows.position.x, worldHeight * 32, follows.position.z);
+
+        // Update player pointer on minimap
+        if (playerPointer)
+        {
+            playerPointer.anchoredPosition = new Vector2(
+                Mathf.Clamp((mainCam.transform.position.x / (float)worldSize) * (minimapSize / 2.0f), -(minimapSize / 2.0f), (minimapSize / 2.0f)),
+                Mathf.Clamp((mainCam.transform.position.z / (float)worldSize) * (minimapSize / 2.0f), -(minimapSize / 2.0f), (minimapSize / 2.0f))
+            );
+        }
+        
     }
 
     float avgFPS = 0;
@@ -151,15 +346,23 @@ public class World : MonoBehaviour
         RenderAll();
     }
 
-    IEnumerator WorldUpdateCoroutine()
+    protected IEnumerator WorldUpdateCoroutine()
     {
-        //worldGenerationCRInProgress = true;
+        // initialization
+        currentWorldUpdateStage = WorldUpdateStage.BUILD_TASKS;
+
+        // main loop
         while (true)
         {
-            yield return StartCoroutine(BuildTasks());
-            //yield return StartCoroutine();
-            //worldGenerationCRInProgress = false;
-            yield return null;
+            switch (currentWorldUpdateStage)
+            {
+                case WorldUpdateStage.BUILD_TASKS:
+                    yield return StartCoroutine(BuildTasks());
+                    break;
+                case WorldUpdateStage.REFRESH_RENDERABLES:
+                    yield return StartCoroutine(RefreshRenderables());
+                    break;
+            }
         }
     }
 
@@ -313,7 +516,7 @@ public class World : MonoBehaviour
         return (new Vector2(follows.position.x, follows.position.z) - new Vector2(r.position.x, r.position.z)).magnitude > (disappearDistance) || r.position.y > (worldHeight * 32.0f);
     }
 
-    void RefreshRenderables()
+    IEnumerator RefreshRenderables()
     {
 #if PROFILE
         UnityEngine.Profiling.Profiler.BeginSample("RefreshRenderables()");
@@ -338,10 +541,10 @@ public class World : MonoBehaviour
                 }
             }
 
-            //if((Time.realtimeSinceStartup - CoroutineStartTime) > (maxCoroutineSpendPerFrameMS / 1000.0f))
-            //{
-            //    yield return null;
-            //}
+            if ((Time.realtimeSinceStartup - CoroutineStartTime) > (maxCoroutineSpendPerFrameMS / 1000.0f))
+            {
+                yield return null;
+            }
         }
 
         foreach (var p in toDel)
@@ -354,25 +557,34 @@ public class World : MonoBehaviour
         UnityEngine.Profiling.Profiler.BeginSample("Generation"); // high cost
 #endif
 
-        foreach (var chk in chunks.Values)
+        Vector3Int[] keys_copy = new Vector3Int[chunks.Keys.Count];
+        chunks.Keys.CopyTo(keys_copy, 0);
+        foreach (var chkpos in keys_copy)
         {
-            // Profiler: ShouldShow 60.64% of RefreshRenderables()
-            if (!chk.hasRenderer() && ShouldShow(chk) && chk.isReadyForPresent())
+            if(chunks.ContainsKey(chkpos))
             {
-                chk.renderer = CreateChunkRenderer(chk, chk.positionOffset, Quaternion.identity);
-                renderables.AddLast(chk.renderer);
-            }
+                var chk = chunks[chkpos];
 
-            if(chk.hasRenderer() && chk.dirty)
-            {
-                chk.renderer.GenerateMesh(chk);
-            }
+                // Profiler: ShouldShow 60.64% of RefreshRenderables()
+                if (!chk.hasRenderer() && ShouldShow(chk) && chk.isReadyForPresent())
+                {
+                    chk.renderer = CreateChunkRenderer(chk, chk.positionOffset, Quaternion.identity);
+                    renderables.AddLast(chk.renderer);
+                }
 
-            //if ((Time.realtimeSinceStartup - CoroutineStartTime) > (maxCoroutineSpendPerFrameMS / 1000.0f))
-            //{
-            //    yield return null;
-            //}
+                if (chk.hasRenderer() && chk.dirty && chk.prepared)
+                {
+                    chk.renderer.GenerateMesh(chk);
+                }
+
+                if ((Time.realtimeSinceStartup - CoroutineStartTime) > (maxCoroutineSpendPerFrameMS / 1000.0f))
+                {
+                    yield return null;
+                }
+            }
         }
+
+        currentWorldUpdateStage = WorldUpdateStage.BUILD_TASKS;
 
 #if PROFILE
         UnityEngine.Profiling.Profiler.EndSample();
@@ -412,7 +624,7 @@ public class World : MonoBehaviour
 #endif
 
                         // Let the chunk populate itself if the chunk is not prepared
-                        if (!chk.prepared)
+                        if (!chk.prepared && !chk.populating)
                         {
                             chk.Populate(dest * 32, chunkGenerator, this);
                         }
@@ -425,9 +637,11 @@ public class World : MonoBehaviour
                 }
             }
         }
+
+        currentWorldUpdateStage = WorldUpdateStage.REFRESH_RENDERABLES;
     }
 
-    public void CreateStructure(BoundsInt bound, StructureGenerator structureGen)
+    public void CreateStructure(BoundsInt bound, IStructureGenerator structureGen)
     {
         // Generate all chunks inside bound
         //Vector3Int min = bound.min / 32;
@@ -455,6 +669,11 @@ public class World : MonoBehaviour
 
     Chunk CreateChunk(Vector3Int dest)
     {
+        if(currentWorldUpdateStage == WorldUpdateStage.REFRESH_RENDERABLES)
+        {
+            Debug.LogWarning("Chunk created while building renderables !!");
+        }
+
         Chunk chunk = new Chunk();
         chunk.positionOffset = dest * 32;
         chunks.Add(dest, chunk);
@@ -497,7 +716,7 @@ public class World : MonoBehaviour
 #endif
     }
 
-    void ClearAllImmediate()
+    protected void ClearAllImmediate()
     {
         // Clean up
         StopAllCoroutines();
@@ -531,5 +750,11 @@ public class World : MonoBehaviour
     private void AssemblyReloadEvents_afterAssemblyReload()
     {
         SetWorld();
+    }
+
+    // Helper
+    public static uint GetID(int r, int g, int b, int a)
+    {
+        return (((uint)r) << 24) + (((uint)g) << 16) + (((uint)b) << 8) + ((uint)a);
     }
 }

@@ -1,0 +1,55 @@
+﻿#ifndef GRIDS_64
+#define GRIDS_64
+
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#include "includes/noise.cginc"
+#include "includes/utils.cginc"
+#include "includes/structures.cginc"
+
+StructuredBuffer<int> chkBuf;
+RWStructuredBuffer<unsigned int> blkBuf;
+AppendStructuredBuffer<StructureSeedDescriptor> structureBuf;
+
+// Eco1 = Dirt ground - dead trees should grow on top.
+// Eco2 = Sky bridge - hanged mushrooms should grow under bottom.
+float EvalGeometry(float3 pos, inout uint blk)
+{
+    if (int(pos.y) == 64 && (int(pos.x) % 8 == 0 || int(pos.z) % 8 == 0))
+    {
+        // Ground color
+        blk = 0x555555ff;
+
+        if (int(pos.x) % 32 == 0 || int(pos.z) % 32 == 0)
+        {
+            blk = 0xffffff11;
+        }
+
+        if (int(pos.x) == 0 || int(pos.z) == 0)
+        {
+            blk = 0xffcc8866;
+        }
+
+        return 0;
+    }
+
+    return 1;
+}
+
+[numthreads(8,8,8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	int chkID = id.x / 32;
+	int dest = chkID * 32768 + (id.x % 32) * 1024 + id.y * 32 + id.z;
+
+	float3 pos = float3(int(id.x % 32) + chkBuf[chkID * 3 + 0], int(id.y) + chkBuf[chkID * 3 + 1], int(id.z) + chkBuf[chkID * 3 + 2]);
+
+    uint blk = 0;
+
+    float sdf = EvalGeometry(pos, blk);
+
+    blkBuf[dest] = blk;
+}
+
+#endif //GRIDS_64

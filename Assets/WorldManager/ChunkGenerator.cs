@@ -24,18 +24,13 @@ public class CSGenerator : ChunkGenerator
         // Geometry pass
         if(chunk._geometry_pass_ok)
         {
-            // TODO: again, test purpose; We should wait for the actual jobs to be finished.
             StructureSeedPopulationPass.DoChunk(chunk, world);
-            chunk._structures_ok = true;
         }
         else
         {
             CustomJobs.CustomJob.TryAddJob(new WorldGen.GeometryIndependentPass(chunk, world), (CustomJobs.CustomJob job) =>
             {
                 StructureSeedPopulationPass.DoChunk(chunk, world);
-
-                // TODO: again, test purpose; We should wait for the actual jobs to be finished.
-                chunk._structures_ok = true;
             });
 
         }

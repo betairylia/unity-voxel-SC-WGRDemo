@@ -1,5 +1,6 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
+#pragma kernel GetVertCount
 
 struct Vertex
 {
@@ -12,50 +13,103 @@ StructuredBuffer<unsigned int> chunkData;
 RWStructuredBuffer<unsigned int> indirectBuffer;
 RWStructuredBuffer<Vertex> vertexBuffer;
 
+inline void SetVert(uint3 id : SV_DispatchThreadID, int currPos, out int currIdx, out bool3 facePos, out bool3 faceNeg)
+{
+    // Count vertices number
+    int vCount = 0;
+    facePos = bool3(false, false, false);
+    faceNeg = bool3(false, false, false);
+
+    if (id.x <= 0)
+    {
+        faceNeg.x = true;
+        vCount += 6;
+    }
+    else if (chunkData[currPos - 32 * 32] == 0)
+    {
+        faceNeg.x = true;
+        vCount += 6;
+    }
+
+    if (id.y <= 0)
+    {
+        faceNeg.y = true;
+        vCount += 6;
+    }
+    else if (chunkData[currPos - 32] == 0)
+    {
+        faceNeg.y = true;
+        vCount += 6;
+    }
+
+    if (id.z <= 0)
+    {
+        faceNeg.z = true;
+        vCount += 6;
+    }
+    else if (chunkData[currPos - 1] == 0)
+    {
+        faceNeg.z = true;
+        vCount += 6;
+    }
+
+    if (id.x >= 31)
+    {
+        facePos.x = true;
+        vCount += 6;
+    }
+    else if (chunkData[currPos + 32 * 32] == 0)
+    {
+        facePos.x = true;
+        vCount += 6;
+    }
+
+    if (id.y >= 31)
+    {
+        facePos.y = true;
+        vCount += 6;
+    }
+    else if (chunkData[currPos + 32] == 0)
+    {
+        facePos.y = true;
+        vCount += 6;
+    }
+
+    if (id.z >= 31)
+    {
+        facePos.z = true;
+        vCount += 6;
+    }
+    else if (chunkData[currPos + 1] == 0)
+    {
+        facePos.z = true;
+        vCount += 6;
+    }
+
+    InterlockedAdd(indirectBuffer[0], vCount, currIdx);
+}
+
+[numthreads(8, 8, 8)]
+void GetVertCount (uint3 id : SV_DispatchThreadID)
+{
+    int currPos = id.x * 32 * 32 + id.y * 32 + id.z;
+    if (chunkData[currPos] > 0)
+    {
+        bool3 facePos, faceNeg;
+        int i;
+        SetVert(id, currPos, i, facePos, faceNeg);
+    }
+}
+
 [numthreads(8, 8, 8)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     int currPos = id.x * 32 * 32 + id.y * 32 + id.z;
     if (chunkData[currPos] > 0)
     {
-        // Count vertices number
-        int vCount = 0;
-        bool3 facePos = bool3(false, false, false);
-        bool3 faceNeg = bool3(false, false, false);
-
-        if (id.x <= 0 || chunkData[currPos - 32 * 32] == 0)
-        {
-            faceNeg.x = true;
-            vCount += 6;
-        }
-        if (id.y <= 0 || chunkData[currPos - 32] == 0)
-        {
-            faceNeg.y = true;
-            vCount += 6;
-        }
-        if (id.z <= 0 || chunkData[currPos - 1] == 0)
-        {
-            faceNeg.z = true;
-            vCount += 6;
-        }
-        if (id.x >= 31 || chunkData[currPos + 32 * 32] == 0)
-        {
-            facePos.x = true;
-            vCount += 6;
-        }
-        if (id.y >= 31 || chunkData[currPos + 32] == 0)
-        {
-            facePos.y = true;
-            vCount += 6;
-        }
-        if (id.z >= 31 || chunkData[currPos + 1] == 0)
-        {
-            facePos.z = true;
-            vCount += 6;
-        }
-
+        bool3 facePos, faceNeg;
         int i;
-        InterlockedAdd(indirectBuffer[0], vCount, i);
+        SetVert(id, currPos, i, facePos, faceNeg);
 
         float4 blockSize = float4(1.0, 1.0, 1.0, 0);
         float3 blockOffset = float3(-0.05, -0.05, -0.05) + float3(id.x, id.y, id.z);

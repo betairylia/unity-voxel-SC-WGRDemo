@@ -6,11 +6,14 @@ public class ChunkRenderer
 {
     public Chunk chunk;
     public ComputeShader cs_chunkMeshPopulator;
-    public ComputeBuffer buffer, indBuffer, inputBuffer;
+    public ComputeBuffer buffer, buffer_bak, indBuffer, inputBuffer;
     public Material chunkMat;
     public MaterialPropertyBlock matProp;
 
-    public int[] _ind;
+    bool waiting = false;
+
+    uint[] _ind;
+    public uint vCount { get; private set; }
 
     protected Vector3Int myPos;
     public Bounds bound
@@ -35,6 +38,7 @@ public class ChunkRenderer
     public ChunkRenderer()
     {
         populated = false;
+        vCount = 0;
     }
 
     public virtual void Init(Chunk chunk)
@@ -46,9 +50,8 @@ public class ChunkRenderer
         matProp = new MaterialPropertyBlock();
 
         // Draw it by invoking the CS
-        buffer = new ComputeBuffer(65536, System.Runtime.InteropServices.Marshal.SizeOf(typeof(Vertex)));
 
-        indBuffer = new ComputeBuffer(4, sizeof(int), ComputeBufferType.IndirectArguments);
+        indBuffer = new ComputeBuffer(5, sizeof(uint), ComputeBufferType.IndirectArguments);
 
         inputBuffer = new ComputeBuffer(this.chunk.chunkData.Length, sizeof(int));
 
@@ -61,14 +64,50 @@ public class ChunkRenderer
 
     public virtual void GenerateMesh(Chunk chunk)
     {
-        buffer.SetCounterValue(0);
+        if (waiting) { return; }
+        waiting = true;
 
-        _ind = new int[] { 0, 1, 0, 0 };
+        _ind = new uint[] { 0, 1, 0, 0, 0 };
         indBuffer.SetData(_ind);
 
         inputBuffer.SetData(this.chunk.chunkData);
 
         // Set buffers for I/O
+        cs_chunkMeshPopulator.SetBuffer(1, "indirectBuffer", indBuffer);
+        cs_chunkMeshPopulator.SetBuffer(1, "chunkData", inputBuffer);
+
+        // Get chunk vert count
+        cs_chunkMeshPopulator.Dispatch(1, 32 / 8, 32 / 8, 32 / 8);
+        indBuffer.GetData(_ind);
+
+        int allocSize = (int)(_ind[0] * 1.0) + 1024;
+
+        // Need to extend buffer size
+        if (vCount < _ind[0])
+        {
+            // Realloc
+            if(buffer != null)
+            {
+                buffer_bak = buffer;
+                matProp.SetBuffer("cs_vbuffer", buffer_bak);
+            }
+
+            // 1.0 - scale factor for potentially more blocks
+            buffer = new ComputeBuffer(allocSize, System.Runtime.InteropServices.Marshal.SizeOf(typeof(Vertex)));
+        }
+        else if(_ind[0] == 0)
+        {
+            chunk.dirty = false;
+            populated = true;
+            waiting = false;
+            return;
+        }
+
+        vCount = (uint)allocSize;
+        _ind[0] = 0;
+        indBuffer.SetData(_ind);
+
+        buffer.SetCounterValue(0);
         cs_chunkMeshPopulator.SetBuffer(0, "vertexBuffer", buffer);
         cs_chunkMeshPopulator.SetBuffer(0, "indirectBuffer", indBuffer);
         cs_chunkMeshPopulator.SetBuffer(0, "chunkData", inputBuffer);
@@ -103,8 +142,15 @@ public class ChunkRenderer
 
         // Set material parameters
         matProp.SetBuffer("cs_vbuffer", buffer);
+
+        // Release previous buffer
+        if(buffer_bak != null)
+        {
+            buffer_bak.Dispose();
+        }
      
         populated = true;
+        waiting = false;
     }
 
     public void Clean()

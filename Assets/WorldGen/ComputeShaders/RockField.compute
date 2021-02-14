@@ -41,8 +41,8 @@ float EvalGeometry(float3 pos, out float height, inout uint blk, out float eco1,
 
     // This punishes the sky bridge on higher places & low density area of fbm_4 (noise)
     float correlation = (
-            2.5 +                                   // base punishment
-            ((np.y - height) / 45.)                // punishment w.r.t. height (from ground)
+        2.5 +                                   // base punishment
+        ((np.y - height) / 45.)                // punishment w.r.t. height (from ground)
         ) * (fbm_4(np.xz / 100.0) * 0.5 + 0.5);    // noisy multiplier (on higher values of fbm_4, nearly no punishments (*=0))
     
     cav = cav + correlation;                        // Apply the punishment by pushing the surface away (increase distance)
@@ -98,6 +98,17 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         // Eco1: Dirt; we have only if we are up enough and "eco1" enough
         if (up > 0.015 && eco1 > 0.8) // Last hash = 5% chance to populate a tree
         {
+            // Test
+            if (ecoRNG > 0.986f && ecoRNG < 0.99f)
+            {
+                //blkBuf[dest] = ToID(float4(0.961, 0.510, 0.125, 1)); //orange
+
+                StructureSeedDescriptor desc;
+                desc.structureType = -1; // Matryoshka test
+                desc.worldPos = i_worldPos;
+                structureBuf.Append(desc);
+            }
+
             // Bush
             if (ecoRNG > 0.99f && ecoRNG < 0.999f)
             {

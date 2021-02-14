@@ -145,7 +145,7 @@ namespace CustomJobs
 
         #endregion
 
-        protected virtual void Depends(CustomJob dependency)
+        public virtual void Depends(CustomJob dependency)
         {
             if(dependency == null) { return; } // Probably we depends on an "AlreadyFinished" job.
 
@@ -154,7 +154,7 @@ namespace CustomJobs
             dependenciesCount += 1;
         }
 
-        protected virtual void Depends(IEnumerable<CustomJob> dependencies)
+        public virtual void Depends(IEnumerable<CustomJob> dependencies)
         {
             foreach (var job in dependencies)
             {
@@ -211,6 +211,37 @@ namespace CustomJobs
                     job.Execute();
                 }
             }
+        }
+    }
+
+    public class JobWrapper : CustomJobs.CustomJob
+    {
+        public delegate void Work();
+        Work work;
+        bool work_finished;
+
+        public JobWrapper(Work work)
+        {
+            this.work = work;
+            isUnique = false;
+            work_finished = false;
+        }
+
+        public override void InitJob() {}
+
+        protected override void OnExecute()
+        {
+            work();
+            work_finished = true;
+        }
+
+        public override bool CheckFinished()
+        {
+            if (scheduled && work_finished)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

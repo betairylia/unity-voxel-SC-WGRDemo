@@ -12,8 +12,12 @@ public class Chunk : IDisposable
     public List<WorldGen.StructureSeedDescriptor> structureDescriptors = new List<WorldGen.StructureSeedDescriptor>();
 
     public bool _geometry_pass_ok = false;
+    public bool _geometry_pass_started = false;
     public bool _structures_ok = false;
+    public bool _structures_started = false;
     public bool dirty = true;
+
+    public bool populating { get; private set; }
 
     public CustomJobs.CustomJob lastQueuedWriter;
 
@@ -38,6 +42,7 @@ public class Chunk : IDisposable
     public Chunk()
     {
         populated = false;
+        populating = false;
     }
 
     ~Chunk()
@@ -52,6 +57,7 @@ public class Chunk : IDisposable
 
     public void Populate(Vector3Int myPos, ChunkGenerator generator, World world)
     {
+        populating = true;
         this.positionOffset = myPos;
 
         populated = generator.Generate(this, world);
@@ -96,6 +102,11 @@ public class Chunk : IDisposable
 
     public void AddStructureSeed(WorldGen.StructureSeedDescriptor seed)
     {
+        //Debug.LogError($"Seed duplication check in use, heavy");
+        //if(structureDescriptors.Contains(seed))
+        //{
+        //    Debug.LogWarning($"Seed already exist: {seed}");
+        //}
         structureDescriptors.Add(seed);
     }
 }

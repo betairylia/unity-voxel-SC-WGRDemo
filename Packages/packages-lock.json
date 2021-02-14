@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.github.siccity.xnode": {
+      "version": "https://github.com/siccity/xNode.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "75ee5d47fff5f9cca7af1e514c13e44a97272ec0"
+    },
     "com.solidalloy.type.references": {
       "version": "https://github.com/SolidAlloy/ClassTypeReference-for-Unity.git",
       "depth": 0,

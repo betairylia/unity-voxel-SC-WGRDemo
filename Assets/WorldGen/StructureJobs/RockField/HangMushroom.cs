@@ -17,11 +17,11 @@ using System.Collections.Generic;
 //}
 
 // Test purpose
-public class HangMushroom_test : StructureGenerator
+public class HangMushroom_test : IStructureGenerator
 {
     public static System.Random random = new System.Random();
 
-    public override void Generate(BoundsInt bound, World world)
+    public void Generate(BoundsInt bound, World world)
     {
         Vector3Int root = bound.min + WorldGen.Consts.structureSeedGenerationSizes[(int)WorldGen.StructureType.HangMushroom].min;
         int minLenth = 4;

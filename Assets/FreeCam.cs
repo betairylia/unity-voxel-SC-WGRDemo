@@ -108,13 +108,16 @@ public class FreeCam : MonoBehaviour
             transform.position = transform.position + transform.forward * axis * zoomSensitivity;
         }
 
-        if (Input.GetKeyDown(KeyCode.Mouse1))
+        if (Input.GetKeyDown(KeyCode.C))
         {
-            StartLooking();
-        }
-        else if (Input.GetKeyUp(KeyCode.Mouse1))
-        {
-            StopLooking();
+            if(looking)
+            {
+                StopLooking();
+            }
+            else
+            {
+                StartLooking();
+            }
         }
     }
 

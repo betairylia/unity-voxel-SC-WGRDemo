@@ -1,19 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public abstract class StructureGenerator
+public interface IStructureGenerator
 {
-    protected uint GetID(int r, int g, int b, int a)
-    {
-        return (((uint)r) << 24) + (((uint)g) << 16) + (((uint)b) << 8) + ((uint)a);
-    }
-
-    public abstract void Generate(BoundsInt bound, World world);
+    void Generate(BoundsInt bound, World world);
 }
 
-public class UglySphere : StructureGenerator
+public class UglySphere : IStructureGenerator
 {
-    public override void Generate(BoundsInt bound, World world) 
+    public void Generate(BoundsInt bound, World world) 
     {
         Vector3 center = bound.center;
         for(int x = bound.min.x; x <= bound.max.x; x++)

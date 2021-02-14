@@ -10,7 +10,7 @@ namespace WorldGen
     // see https://qiita.com/tatsunoru/items/611d0378086dc5986249
     public struct GenericStructureGeneratorJobWrapper : IJob
     {
-        public GCHandle<StructureGenerator> generator;
+        public GCHandle<IStructureGenerator> generator;
         public GCHandle<World> world;
         public BoundsInt bound;
 
@@ -22,7 +22,9 @@ namespace WorldGen
 
     public class GenericStructureGeneration : CustomJobs.MultipleChunkJob
     {
-        StructureGenerator generator;
+        static HashSet<BoundsInt> cache = new HashSet<BoundsInt>(); // For debug
+
+        IStructureGenerator generator;
         BoundsInt bound;
         World world;
 
@@ -57,11 +59,18 @@ namespace WorldGen
             return result;
         }
 
-        public GenericStructureGeneration(World world, StructureGenerator generator, BoundsInt bound) : base (BoundWorldToChunks(world, bound))
+        public GenericStructureGeneration(World world, IStructureGenerator generator, BoundsInt bound) : base (BoundWorldToChunks(world, bound))
         {
             this.generator = generator;
             this.bound = bound;
             this.world = world;
+
+            //Debug.LogError($"StructureJob duplication check in use, heavy");
+            //if(cache.Contains(bound))
+            //{
+            //    Debug.LogWarning($"Exact same structure populated at {bound}");
+            //}
+            cache.Add(bound);
 
             isUnique = false;
         }

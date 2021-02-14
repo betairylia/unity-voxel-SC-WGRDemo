@@ -39,16 +39,21 @@ namespace Assets.FractalSystemCore.NodeInherits
         public Vector3 gravityAxis = Vector3.down;
 
         public int iterationStep = 0;
+        float trunkLen = 1.0f, crownWidth = 1.0f, rootScale = 1.35f, endRadiusScale = 0.15f;
 
         List<TreeSplineNode> spline = new List<TreeSplineNode>();
 
         BranchType branchType = BranchType.Trank;
         System.Random random;
 
-        public TreeVer4_Ultra(System.Random random)
+        public TreeVer4_Ultra(System.Random random, float trunkLen = 1.0f, float crownWidth = 1.0f, float rootScale = 1.35f, float endRadiusScale = 0.15f)
         {
             submeshCount = 2;
             this.random = random;
+            this.trunkLen = trunkLen;
+            this.crownWidth = crownWidth;
+            this.rootScale = rootScale;
+            this.endRadiusScale = endRadiusScale;
         }
 
         #region 形态处理函数
@@ -66,7 +71,7 @@ namespace Assets.FractalSystemCore.NodeInherits
             }
             if (branchType == BranchType.Trank)
             {
-                endRadius = startRadius * 0.15f;
+                endRadius = startRadius * endRadiusScale;
             }
             else
             {
@@ -107,7 +112,7 @@ namespace Assets.FractalSystemCore.NodeInherits
             //如果是主干，根部加粗
             if (branchType == BranchType.Trank)
             {
-                spline[i].radius *= 1.35f;
+                spline[i].radius *= rootScale;
             }
 
             for (i = 1; i < spline.Count; i++)
@@ -191,6 +196,23 @@ namespace Assets.FractalSystemCore.NodeInherits
 
         #endregion
 
+        uint trunkBlock;
+        uint branchBlock = (uint)Blocks.wood;
+
+        TestTree.LeafRenderingSetup leafRenderingSetup = TestTree.GetDefaultLeafRenderingSetup();
+
+        public void SetColors(uint t, uint b, uint l)
+        {
+            trunkBlock = t;
+            branchBlock = b;
+            leafRenderingSetup.leaf = l;
+        }
+
+        public void SetLeaf(TestTree.LeafRenderingSetup setup)
+        {
+            this.leafRenderingSetup = setup;
+        }
+
         public override void Express(
             World world,
             ref FractalRenderState state
@@ -202,11 +224,12 @@ namespace Assets.FractalSystemCore.NodeInherits
 
             float leaveRadius = 4.0f * startGrowRate / 24.0f;
 
-            uint blk = (uint)Blocks.wood;
+            uint blk = branchBlock;
 
             if (branchType == BranchType.Leaves)
             {
-                TestTree.FillSphere(world, (uint)Blocks.leaf, state.position + state.scale * centerPos, state.scale * MathCore.RandomRange(random, 3.0f, 5.0f));
+                TestTree.FillLeaf(world, leafRenderingSetup, state.position + state.scale * centerPos, state.scale * Mathf.Min(growRate * 0.31f, 3.0f) * MathCore.RandomRange(random, 3.0f, 5.0f));
+                //Debug.Log(growRate);
                 //Debug.Log("Using green branch as leaves");
             }
             else
@@ -266,6 +289,7 @@ namespace Assets.FractalSystemCore.NodeInherits
                     radiusRate *= 1.5f;
                     gravityConst = new float[10] { 0.0f, 0.15f, 0.25f, 0.50f, 0.25f, 0.0f, -0.15f, -0.25f, -0.40f, 0.0f };
                     gravityLenthNormalized = 0.25f;
+                    branchStart = (int)(3.0f * this.trunkLen);
                 }
                 if (branchType == BranchType.Branch)
                 {
@@ -293,8 +317,8 @@ namespace Assets.FractalSystemCore.NodeInherits
                 }
                 if (iterationStep == 2)
                 {
-                    step = 3;
-                    steps = 2;
+                    step = 1;
+                    steps = 4;
                     count = 1;
                     branchStart = 6;
                     branchEnd = 7;
@@ -388,7 +412,7 @@ namespace Assets.FractalSystemCore.NodeInherits
 
                             //这个树枝的生长率（长度与粗细）
                             float radius = spline[i].radius * (((radEnd - radStart) * ((stepCount - 1) / (float)(steps - 1)) + radStart) + MathCore.RandomRange(random, -radRand, radRand));
-                            branch.growRate = radius / branch.radiusRate;
+                            branch.growRate = radius / branch.radiusRate * crownWidth;
 
                             //下一个树叶要旋转一下
                             stepAngle += dAngle + MathCore.RandomRange(random, -stepRand, stepRand);
@@ -449,7 +473,7 @@ namespace Assets.FractalSystemCore.NodeInherits
 
                         //这个树枝的生长率（长度与粗细）
                         float radius = spline[i].radius * (((radEnd - radStart) * ((stepCount - 1) / (float)(steps - 1)) + radStart) + MathCore.RandomRange(random, -radRand, radRand));
-                        branch.growRate = radius / branch.radiusRate;
+                        branch.growRate = radius / branch.radiusRate * crownWidth;
 
                         //这个树枝会越来越“细长”
                         branch.height *= ((heightEnd - heightStart) * ((stepCount - 1) / (float)(steps - 1)) + heightStart);
@@ -529,7 +553,7 @@ namespace Assets.FractalSystemCore.NodeInherits
 
                             //这个树枝的生长率（长度与粗细）
                             float radius = spline[i].radius * (((radEnd - radStart) * ((stepCount - 1) / (float)(steps - 1)) + radStart) + MathCore.RandomRange(random, -radRand, radRand));
-                            branch.growRate = radius / branch.radiusRate;
+                            branch.growRate = radius / branch.radiusRate * crownWidth;
 
                             //下一个树叶要旋转一下
                             stepAngle += dAngle + MathCore.RandomRange(random, -stepRand, stepRand);
@@ -590,7 +614,7 @@ namespace Assets.FractalSystemCore.NodeInherits
 
                         //这个树枝的生长率（长度与粗细）
                         float radius = spline[i].radius * (((radEnd - radStart) * ((stepCount - 1) / (float)(steps - 1)) + radStart) + MathCore.RandomRange(random, -radRand, radRand));
-                        branch.growRate = radius / branch.radiusRate;
+                        branch.growRate = radius / branch.radiusRate * crownWidth;
 
                         //这个树枝会越来越“细长”
                         branch.height *= ((heightEnd - heightStart) * ((stepCount - 1) / (float)(steps - 1)) + heightStart);
