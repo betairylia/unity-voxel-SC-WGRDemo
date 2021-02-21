@@ -88,10 +88,6 @@ namespace Matryoshka
         public void GenerateRec(AbsUnderNode node, World world)
         {
             node.Build(world);
-            if(node is IVoxelizableUnderNode)
-            {
-                (node as IVoxelizableUnderNode).Voxelize(world);
-            }
 
             foreach(var n in node.children)
             {

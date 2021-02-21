@@ -4,9 +4,21 @@ using UnityEngine;
 
 namespace WorldGen.WorldSketch
 {
-    public static class BasicMountainErosion
+    public interface IWorldSketcher
     {
-        public static void FillHeightmap(
+        void FillHeightmap(
+            ref float[] heightMap,
+            ref float[] erosionMap,
+            ref float[] waterMap,
+            int sizeX,
+            int sizeY,
+
+            float gain = 1.0f);
+    }
+
+    public class BasicMountainErosion : IWorldSketcher
+    {
+        public void FillHeightmap(
             ref float[] heightMap,
             ref float[] erosionMap,
             ref float[] waterMap,
@@ -76,9 +88,9 @@ namespace WorldGen.WorldSketch
         }
     }
 
-    public static class SillyRiverPlains
+    public class SillyRiverPlains : IWorldSketcher
     {
-        public static void FillHeightmap(
+        public void FillHeightmap(
             ref float[] heightMap,
             ref float[] erosionMap,
             ref float[] waterMap,

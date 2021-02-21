@@ -1,4 +1,6 @@
 ﻿/**TODO list:
- * Use GPUBatchedCustomJob to implement "Geometry Pass" of chunk generation.
- * Implement and append structure generation task which depends "Geometry Pass".
+ * Non-seed input ports for Matryoshka
+ * Switch blocks from uint into structs
+ * BlockGroups
+ * Load presets from MagicaVoxel
  */

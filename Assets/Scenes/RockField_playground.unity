@@ -1095,12 +1095,16 @@ MonoBehaviour:
     GuidAssignmentFailed: 0
     _typeNameAndAssembly: CSGenerator, Assembly-CSharp
     _GUID: 
+  sketcherType:
+    GuidAssignmentFailed: 0
+    _typeNameAndAssembly: WorldGen.WorldSketch.BasicMountainErosion, Assembly-CSharp
+    _GUID: a3c73b81e2293c547ac030d04a41ed76
   chunkMat: {fileID: 2100000, guid: e66655643f4e2b743b475b5d1f9d3ea0, type: 2}
   cs_chunkMeshPopulator: {fileID: 7200000, guid: 5234b2b768251754e8971dbfe2bfdf39, type: 3}
   follows: {fileID: 309139661}
   groundPlane: {fileID: 629257353}
   capPlane: {fileID: 1632425195}
-  cs_generation: {fileID: 7200000, guid: ac48c602105ebe2409577ffe0cd60085, type: 3}
+  cs_generation: {fileID: 7200000, guid: b37374cab89ecc44bbb4a1adb288c523, type: 3}
   cs_generation_batchsize: 512
   mainCam: {fileID: 309139660}
   viewCull: 1
@@ -1116,6 +1120,15 @@ MonoBehaviour:
   showSketchMesh: 0
   sketchMeshMat: {fileID: 0}
   matryoshkaGraph: {fileID: 11400000, guid: 5162c1a831a83fe43bd65ca8f90edb2f, type: 2}
+  structureGraphs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!4 &1074158808
 Transform:
   m_ObjectHideFlags: 0

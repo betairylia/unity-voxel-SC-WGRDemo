@@ -5,7 +5,7 @@ namespace WorldGen
 {
     public struct StructureSeedDescriptor
     {
-        public StructureType structureType;
+        public StructureType structureType; //enum
         public Vector3Int worldPos;
     }
 
@@ -21,7 +21,7 @@ namespace WorldGen
         MoonForestGiantTree = 3,
         MoonForestTree = 4,
         MoonFlower = 5,
-        MoonLightbulb = 6,
+        MoonFlowerVine = 6,
     }
 
     public static class Consts
@@ -47,6 +47,19 @@ namespace WorldGen
             new BoundsInt(), // 
             new BoundsInt(), // 
             new BoundsInt(), // 
+        };
+
+        // Structures with larger numbers will be generated after all structures with smaller numbers (single chunk ...).
+        public static readonly int[] structureSeedGenerationPriority =
+        {
+            0, // Sphere
+            0, // Tree
+            0, // Hang Mushroom
+
+            0, // Moonlight forest giant tree
+            0, // Moonlight forest tree
+            1, // Moonlight forest flower bush
+            2, // Moonlight forest flower vine
         };
     }
 }

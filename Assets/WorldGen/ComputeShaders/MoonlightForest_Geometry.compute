@@ -6,6 +6,7 @@
 
 #include "includes/noise.cginc"
 #include "includes/utils.cginc"
+#include "includes/old_grid_ecosystem.cginc"
 #include "includes/structures.cginc"
 
 StructuredBuffer<int> chkBuf;
@@ -24,36 +25,80 @@ static const float4 bRock = float4(0.467, 0.471, 0.482, 1);
 static const float4 bSand = float4(1.000, 0.910, 0.686, 1);
 static const float4 bWater = float4(0, 0.718, 0.808, 1);
 
+static const float Gaussian5[5] = {0.06136, 0.24477, 0.38774, 0.24477, 0.06136};
+
+// Slow Silly thing
+float4 SampleGaussianBlur(float2 uv, float2 radius, Texture2D<float4> tex, SamplerState samplerState)
+{
+    float2 stepSize = radius / 2.0;
+    float4 result = float4(0, 0, 0, 0);
+
+    for (int x = -2; x <= 2; x++)
+    {
+        for (int y = -2; y <= 2; y++)
+        {
+            // Use Mip ?
+            result += Gaussian5[x + 2] * Gaussian5[y + 2] * tex.SampleLevel(samplerState, uv + stepSize * float2(x, y), 0);
+        }
+    }
+
+    return result;
+}
+
 float EvalGeometry(float3 pos, out float height, inout uint blk, out float dRiver)
 {
     /////////////////////// Height map & Apply sketch
     //float4 color = float4(0, 0, 0, 1); // ground color
-    float4 color = lerp(float4(0.427, 0.514, 0.275, 1), float4(0.427, 0.373, 0.102, 1), clamp(fbm_4(pos / 1.8 + float3(1.2345, -6.1237, 0.1246)) * 1 + 0.5, 0, 1)); // ground color, grassy
+    float4 color = lerp(float4(0, 0.365, 0.302, 1), float4(0, 0.694, 0.420, 1), clamp(fbm_4(pos / 1.8 + float3(1.2345, -6.1237, 0.1246)) * 1 + 0.5, 0, 1)); // ground color, blueish - grassy
 
     //height = fbm_9(pos.xz / 100.0) * 0.5 + 0.5; // 0 ~ 1
     //height = sketch[float2(0.5, 0.8)].r;
     float4 sketch = Sketch.SampleLevel(samplerSketch, (pos.xz / (sketchSize * sketchScale)) + 0.5f, 0);
+    float water = smoothstep(0, 0.08, sketch.b);
     height = sketch.r;
-    float erosion = sketch.g;
+
+    // Apply paths
+    if (water > 0.0f)
+    {
+        float4 sketch_blur = SampleGaussianBlur(
+            (pos.xz / (sketchSize * sketchScale)) + 0.5f,
+            float2(1, 1) * 16.0 / (sketchSize * sketchScale),
+            Sketch,
+            samplerSketch
+        );
+
+        //float path_height = SmoothFloor(sketch_blur.r / 0.05, 10.0) * 0.05;
+        float path_height = sketch_blur.r;
+
+        height = lerp(height, path_height, water);
+    }
     
+    float erosion = sketch.g;
+
     // Scale
-    //height = (height * 45.0 - 15.0);
     height = (height * 256.0);
 
+    // Very poor terrace
+    // height = SmoothFloor(height / 10, 0.25) * 10.0;
+
     // Water structure
-    float water = smoothstep(0, 0.08, sketch.b);
     height += (fbm_9(pos.xz / 40.0) * 3.0f) * (1.0f - water);
-    height += water * (-1.0f);
+    //height += water * (-1.0f);
     //height += (1 - water) * hash13(pos);
 
     // Water texture
     //color = lerp(color, bSand, smoothstep(0, 1, pow(sketch.b + 1.0, 3)));
-    color = lerp(color, bWater, water);
     dRiver = -sketch.b;
-    color.r -= pow(sketch.b + 1.0, 3);
+    float capped_b = clamp(sketch.b + 1.0, 0.0, 1.0);
+    color.r += 0.15 * pow(capped_b, 2.4);
+    color.b += 0.3 * pow(capped_b, 3.0);
+    color = lerp(color, bDirt, water);
 
     // Distance
     float sdf = pos.y - height;
+
+    // Salt
+    //sdf += fbm_4(pos / 15.0f) * 25.0f;
 
     /////////////////////// River bank rock
     float4 rockColor = lerp(float4(0.15, 0.15, 0.15, 1), float4(0.282, 0.486, 0.220, 1), pow(clamp(fbm_4(pos / 1.4 + float3(1.2345, -6.1237, 0.1246)) * 1 + 0.5, 0, 1), 2.5)); // moss rock color
@@ -98,7 +143,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         if (xzRNG < 1e-2 && ecoRNG < 6e-4)
         {
             // Just a glowing block
-            blk = 0xffef6cc8; // yellow
+            //blk = 0xffef6cc8; // yellow
             //blk = 0x90d7ecc8; // blue (white?)
 
             // TODO: make this structure
@@ -118,39 +163,79 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         if (up > 0.015)
         {
             // Ecosystem gradient ( to avoid overlapping trees )
-            float grad = fbm_4(pos.xz / 45.2f + float2(0.273f, 1.588f)) - 0.2f;
+            float grad = fbm_4(pos.xz / 45.2f + float2(0.273f, 1.588f)) + 0.5f;
 
-            float t1 = smoothstep(0.0, 0.1, grad);
-            float t2 = smoothstep(0.0, 0.1, -grad);
+            /*float t1 = smoothstep(0.0, 0.1, grad);
+            float t2 = smoothstep(0.0, 0.1, -grad);*/
 
-            //blk = ToID(float4(t1, t2, t3, 0.25f));
+            // Ecosystem definitions
+            GridEcoSystemDesc eco_moonlit = MakeEco(
+                float2(1.55, -7.28),
+                20.0,
+                55.0,
+                15.0,
+                0.9
+            );
 
-            // Giant tree
-            //if (ecoRNG > 0.9995f && dRiver > 0.3f)
-            if (ecoRNG < 0.00025f && dRiver > 0.3f)
+            GridEcoSystemDesc eco_darkoak = MakeEco(
+                float2(0.15, -3.28),
+                16.0,
+                45.0,
+                10.0,
+                0.85
+            );
+
+            GridEcoSystemDesc eco_flowers = MakeEco(
+                float2(0.08, 1.29),
+                4.0,
+                8.0,
+                2.5,
+                0.85
+            );
+
+            GridEcoSystemDesc eco_flowervines = MakeEco(
+                float2(1.08, 0.29),
+                5.0,
+                8.0,
+                3.5,
+                0.85
+            );
+
+            // Moonlit tree
+            if (grad > 0)
             {
-                StructureSeedDescriptor desc;
-                desc.structureType = SU_MOONFOREST_GIANTTREE;
-                desc.worldPos = i_worldPos;
-                structureBuf.Append(desc);
+                if (DistanceToRoot(pos, eco_moonlit) < 0.5 && dRiver > 0.15f)
+                {
+                    StructureSeedDescriptor desc;
+                    desc.structureType = SU_MOONFOREST_GIANTTREE;
+                    desc.worldPos = i_worldPos;
+                    structureBuf.Append(desc);
+                }
+            }
+            // Dark Oak
+            if(grad < 0.15f)
+            {
+                if (DistanceToRoot(pos, eco_darkoak) < 0.5 && dRiver > 0.08f)
+                {
+                    StructureSeedDescriptor desc;
+                    desc.structureType = SU_MOONFOREST_TREE;
+                    desc.worldPos = i_worldPos;
+                    structureBuf.Append(desc);
+                }
             }
 
-            // Tree
-            //if (ecoRNG > 0.997f && ecoRNG < 0.9995f && dRiver > 0.05f)
-            if (ecoRNG * t1 > 0.9985f && dRiver > 0.03f)
-            {
-                StructureSeedDescriptor desc;
-                desc.structureType = SU_MOONFOREST_TREE;
-                desc.worldPos = i_worldPos;
-                structureBuf.Append(desc);
-            }
-
-            // Bush / Flowers
-            //if (ecoRNG > 0.98f && ecoRNG < 0.997f && dRiver > 0.05f)
-            if (ecoRNG * t2 > 0.9965f && dRiver > 0.08f)
+            if (DistanceToRoot(pos, eco_flowers) < 0.5 && dRiver > 0.08f)
             {
                 StructureSeedDescriptor desc;
                 desc.structureType = SU_MOONFOREST_FLOWER;
+                desc.worldPos = i_worldPos;
+                structureBuf.Append(desc);
+            }
+
+            if (DistanceToRoot(pos, eco_flowervines) < 0.5 && dRiver > 0.08f)
+            {
+                StructureSeedDescriptor desc;
+                desc.structureType = SU_MOONFOREST_FLOWERVINE;
                 desc.worldPos = i_worldPos;
                 structureBuf.Append(desc);
             }

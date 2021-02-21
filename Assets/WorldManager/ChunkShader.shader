@@ -94,6 +94,7 @@
             if (IN.color.a <= 0.9f)
             {
                 o.Emission = 2.0f * (IN.color.a / 0.5f) * float4(IN.color.rgb, 1.5);
+                o.Albedo = IN.color.rgb;
             }
             else
             {

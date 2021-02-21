@@ -230,6 +230,7 @@ MonoBehaviour:
   childGapSeg: 2
   subSegSpread: 0.05
   nChildrenPerGap: 3
+  childRate: 1
   tiltStart: 45
   tiltEnd: 5
   tiltRand: 5
@@ -239,6 +240,9 @@ MonoBehaviour:
   childRotProgressionRand: 60
   gapRotProgressionRand: 90
   gapRotInit: 0
+  directChild: 0
+  childDirection: {x: 0, y: 1, z: 0}
+  childDirectionStrength: 1
   block: 1243545855
 --- !u!114 &11400000
 MonoBehaviour:
@@ -296,7 +300,9 @@ MonoBehaviour:
   seedCenter: {x: 64, y: 10, z: 64}
   rootPos: {x: 0, y: 0, z: 0}
   rootNormal: {x: 0, y: 1, z: 0}
-  rootPower: 1
+  rootPowerMin: 1
+  rootPowerMax: 1
+  mustEmpty: 0
   root:
     val: []
 --- !u!114 &2030608638042181029
@@ -451,6 +457,7 @@ MonoBehaviour:
   childGapSeg: 2
   subSegSpread: 0.05
   nChildrenPerGap: 1
+  childRate: 1
   tiltStart: 55
   tiltEnd: 30
   tiltRand: 5
@@ -460,6 +467,9 @@ MonoBehaviour:
   childRotProgressionRand: 10
   gapRotProgressionRand: 10
   gapRotInit: 0
+  directChild: 0
+  childDirection: {x: 0, y: 1, z: 0}
+  childDirectionStrength: 1
   block: 1243545855
 --- !u!114 &3773019967408304012
 MonoBehaviour:
@@ -752,6 +762,7 @@ MonoBehaviour:
   childGapSeg: 3
   subSegSpread: 0.05
   nChildrenPerGap: 2
+  childRate: 1
   tiltStart: 65
   tiltEnd: 55
   tiltRand: 20
@@ -761,4 +772,7 @@ MonoBehaviour:
   childRotProgressionRand: 10
   gapRotProgressionRand: 10
   gapRotInit: 90
+  directChild: 0
+  childDirection: {x: 0, y: 1, z: 0}
+  childDirectionStrength: 1
   block: 1243545855

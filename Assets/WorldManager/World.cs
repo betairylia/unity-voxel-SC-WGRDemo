@@ -7,6 +7,7 @@ using TypeReferences;
 using System;
 using Unity.Jobs;
 using UnityEngine.Rendering;
+using WorldGen.WorldSketch;
 
 // TODO: Refactor for editor usage
 public class World : MonoBehaviour
@@ -35,6 +36,10 @@ public class World : MonoBehaviour
     [Inherits(typeof(ChunkGenerator))]
     public TypeReference generatorType;
     protected ChunkGenerator chunkGenerator;
+
+    [Inherits(typeof(IWorldSketcher))]
+    public TypeReference sketcherType;
+    protected IWorldSketcher sketcher;
 
     public Material chunkMat;
     public ComputeShader cs_chunkMeshPopulator;
@@ -147,7 +152,9 @@ public class World : MonoBehaviour
         HydraulicErosionGPU.erosion = erosion_cs;
 
         // Generate height maps
-        WorldGen.WorldSketch.SillyRiverPlains.FillHeightmap(ref heightMap, ref erosionMap, ref waterMap, worldSketchSize, worldSketchSize);
+        sketcher = (IWorldSketcher)System.Activator.CreateInstance(sketcherType);
+        sketcher.FillHeightmap(ref heightMap, ref erosionMap, ref waterMap, worldSketchSize, worldSketchSize);
+        //WorldGen.WorldSketch.SillyRiverPlains.FillHeightmap(ref heightMap, ref erosionMap, ref waterMap, worldSketchSize, worldSketchSize);
 
         // Create texture
         sketchMapTex = new Texture2D(worldSketchSize, worldSketchSize, TextureFormat.RGBAFloat, false);

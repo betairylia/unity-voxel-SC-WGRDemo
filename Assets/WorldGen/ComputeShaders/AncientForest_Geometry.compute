@@ -1,0 +1,163 @@
+﻿#ifndef MOONLIGHTFOREST
+#define MOONLIGHTFOREST
+
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#include "includes/noise.cginc"
+#include "includes/utils.cginc"
+#include "includes/structures.cginc"
+
+StructuredBuffer<int> chkBuf;
+RWStructuredBuffer<unsigned int> blkBuf;
+AppendStructuredBuffer<StructureSeedDescriptor> structureBuf;
+
+Texture2D<float4> Sketch;
+SamplerState samplerSketch;
+
+static const float erosionStrength = 20.0f;
+static const float sketchSize = 1024.0f;
+static const float sketchScale = 4.0f;
+
+static const float4 bDirt = float4(0.729, 0.518, 0.282, 1);
+static const float4 bRock = float4(0.467, 0.471, 0.482, 1);
+static const float4 bSand = float4(1.000, 0.910, 0.686, 1);
+static const float4 bWater = float4(0, 0.718, 0.808, 1);
+
+float EvalGeometry(float3 pos, out float height, inout uint blk, out float dRiver)
+{
+    /////////////////////// Height map & Apply sketch
+    //float4 color = float4(0, 0, 0, 1); // ground color
+    float4 color = lerp(float4(0.427, 0.514, 0.275, 1), float4(0.427, 0.373, 0.102, 1), clamp(fbm_4(pos / 1.8 + float3(1.2345, -6.1237, 0.1246)) * 1 + 0.5, 0, 1)); // ground color, grassy
+
+    //height = fbm_9(pos.xz / 100.0) * 0.5 + 0.5; // 0 ~ 1
+    //height = sketch[float2(0.5, 0.8)].r;
+    float4 sketch = Sketch.SampleLevel(samplerSketch, (pos.xz / (sketchSize * sketchScale)) + 0.5f, 0);
+    height = sketch.r;
+    float erosion = sketch.g;
+    
+    // Scale
+    //height = (height * 45.0 - 15.0);
+    height = (height * 256.0);
+
+    // Water structure
+    float water = smoothstep(0, 0.08, sketch.b);
+    height += (fbm_9(pos.xz / 40.0) * 3.0f) * (1.0f - water);
+    height += water * (-1.0f);
+    //height += (1 - water) * hash13(pos);
+
+    // Water texture
+    //color = lerp(color, bSand, smoothstep(0, 1, pow(sketch.b + 1.0, 3)));
+    color = lerp(color, bWater, water);
+    dRiver = -sketch.b;
+    color.r -= pow(sketch.b + 1.0, 3);
+
+    // Distance
+    float sdf = pos.y - height;
+
+    /////////////////////// River bank rock
+    float4 rockColor = lerp(float4(0.15, 0.15, 0.15, 1), float4(0.282, 0.486, 0.220, 1), pow(clamp(fbm_4(pos / 1.4 + float3(1.2345, -6.1237, 0.1246)) * 1 + 0.5, 0, 1), 2.5)); // moss rock color
+
+    // Where to put rock (edge of river * some noise mask)
+    float riverBankRockProp = smoothstep(-0.1, 0.0, -abs(sketch.b)) * smoothstep(-0.1, 0.1, fbm_4((pos.xz + 3.5) / 40.0));
+
+    // Get "push out" part (<0) of the rock noise and add it to current terrain with colors
+    float riverBankRock = smin((riverBankRockProp * fbm_4(pos / 6.0) + 0.05) * 8.0, 0.0, 0.02, rockColor, color, color);
+    sdf += riverBankRock;
+
+    if (sdf < 0)
+    {
+        // Ground color
+        blk = ToID(color);
+    }
+
+    return sdf;
+}
+
+[numthreads(8,8,8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	int chkID = id.x / 32;
+	int dest = chkID * 32768 + (id.x % 32) * 1024 + id.y * 32 + id.z;
+
+	float3 pos = float3(int(id.x % 32) + chkBuf[chkID * 3 + 0], int(id.y) + chkBuf[chkID * 3 + 1], int(id.z) + chkBuf[chkID * 3 + 2]);
+    int3 i_worldPos = int3(pos.x, pos.y, pos.z);
+
+    float height, dRiver;
+    uint blk = 0;
+
+    float sdf = EvalGeometry(pos, height, blk, dRiver);
+
+    float3 pos_less = pos / 12.8336f;
+    float ecoRNG = hash13(pos_less);
+    float xzRNG = hash12(pos_less.xz + 1.18825f);
+
+    // Mid-air lightbulb
+    if (pos.y - height > 10 && pos.y - height < 200)
+    {
+        if (xzRNG < 1e-2 && ecoRNG < 6e-4)
+        {
+            // Just a glowing block
+            blk = 0xffef6cc8; // yellow
+            //blk = 0x90d7ecc8; // blue (white?)
+
+            // TODO: make this structure
+            /*StructureSeedDescriptor desc;
+            desc.structureType = SU_MOONFOREST_LIGHTBULB;
+            desc.worldPos = i_worldPos;
+            structureBuf.Append(desc);*/
+        }
+    }
+
+    if (sdf <= 0)
+    {
+        float _f;
+        uint _u;
+        float up = EvalGeometry(pos + float3(0, 1, 0), _f, _u, _f);
+
+        if (up > 0.015)
+        {
+            // Ecosystem gradient ( to avoid overlapping trees )
+            float grad = fbm_4(pos.xz / 45.2f + float2(0.273f, 1.588f)) - 0.2f;
+
+            float t1 = smoothstep(0.0, 0.1, grad);
+            float t2 = smoothstep(0.0, 0.1, -grad);
+
+            //blk = ToID(float4(t1, t2, t3, 0.25f));
+
+            // Giant tree
+            //if (ecoRNG > 0.9995f && dRiver > 0.3f)
+            if (ecoRNG < 0.0002f && dRiver > 0.3f)
+            {
+                StructureSeedDescriptor desc;
+                desc.structureType = SU_MOONFOREST_GIANTTREE;
+                desc.worldPos = i_worldPos;
+                structureBuf.Append(desc);
+            }
+
+            // Tree
+            //if (ecoRNG > 0.997f && ecoRNG < 0.9995f && dRiver > 0.05f)
+            if (ecoRNG * t1 > 0.9995f && dRiver > 0.03f)
+            {
+                StructureSeedDescriptor desc;
+                desc.structureType = SU_MOONFOREST_TREE;
+                desc.worldPos = i_worldPos;
+                structureBuf.Append(desc);
+            }
+
+            // Bush / Flowers
+            //if (ecoRNG > 0.98f && ecoRNG < 0.997f && dRiver > 0.05f)
+            if (ecoRNG * t2 > 0.9985f && dRiver > 0.08f)
+            {
+                StructureSeedDescriptor desc;
+                desc.structureType = SU_MOONFOREST_FLOWER;
+                desc.worldPos = i_worldPos;
+                structureBuf.Append(desc);
+            }
+        }
+    }
+
+	blkBuf[dest] = blk;
+}
+
+#endif //MOONLIGHTFOREST

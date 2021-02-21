@@ -35,6 +35,9 @@ namespace Matryoshka
 			{
 				var ins = NewInstance(origin, world);
 				ins._Build(origin, world);
+
+				// TODO: performance issue?
+				ins.Voxelize(world);
 				instances.Add(ins);
 			}
 		}

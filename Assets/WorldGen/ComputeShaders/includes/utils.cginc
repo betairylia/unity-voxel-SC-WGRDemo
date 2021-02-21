@@ -55,4 +55,12 @@ float smax(float b, float a, float s, float4 colorB, float4 colorA, out float4 c
 	return lerp(b, a, where) - where * (1.0 - where) * s;
 }
 
+//https://www.shadertoy.com/view/lljSRV
+float SmoothFloor(float x, float c)
+{
+	float a = frac(x);
+	float b = floor(x);
+	return ((pow(a, c) - pow(1.0 - a, c)) / 2.0) + b;
+}
+
 #endif //UTILS

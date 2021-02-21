@@ -12,14 +12,26 @@ namespace Matryoshka
 		public Vector3 rootPos = new Vector3(0, 0, 0);
 		public Vector3 rootNormal = new Vector3(0, 1, 0);
 		public float rootPower = 1.0f;
+		public bool mustEmpty = true;
 
 		public List<Seed> root;
 
 		public override void Build(World world)
         {
 			root = new List<Seed>();
-			root.Add(new Seed(worldSeed, rootPos, Quaternion.FromToRotation(Vector3.up
-				, rootNormal), rootPower, 0));
+
+			Seed seed = new Seed(worldSeed, rootPos, Quaternion.FromToRotation(Vector3.up
+				, rootNormal), rootPower, 0);
+
+			if(mustEmpty)
+            {
+				if(world.GetBlock(Vector3Int.FloorToInt(seed.position)) > 0)
+                {
+					return;
+                }
+            }
+
+			root.Add(seed);
 		}
     }
 
@@ -34,7 +46,9 @@ namespace Matryoshka
 
 		public Vector3 rootPos = new Vector3(0, 0, 0);
 		public Vector3 rootNormal = new Vector3(0, 1, 0);
-		public float rootPower = 1.0f;
+		public float rootPowerMin = 1.0f;
+		public float rootPowerMax = 1.0f;
+		public bool mustEmpty = true;
 
 		[Space]
 
@@ -57,7 +71,8 @@ namespace Matryoshka
 			// Set parameters
 			n.rootPos = rootPos;
 			n.rootNormal = rootNormal;
-			n.rootPower = rootPower;
+			n.rootPower = UnityEngine.Random.Range(rootPowerMin, rootPowerMax);
+			n.mustEmpty = mustEmpty;
 
 			// Fill output ports
 			root.realized = () => n.root;

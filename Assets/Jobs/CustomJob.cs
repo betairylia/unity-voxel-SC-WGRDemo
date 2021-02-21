@@ -34,6 +34,11 @@ namespace CustomJobs
                     scheduledJobs.Remove(p);
                     queuedUniqueJobs.Remove(p.Value);
                     Count -= 1;
+
+                    if(Count < 0)
+                    {
+                        Debug.LogError("??");
+                    }
                 }
 
                 p = _p;
@@ -217,7 +222,7 @@ namespace CustomJobs
     public class JobWrapper : CustomJobs.CustomJob
     {
         public delegate void Work();
-        Work work;
+        public Work work;
         bool work_finished;
 
         public JobWrapper(Work work)

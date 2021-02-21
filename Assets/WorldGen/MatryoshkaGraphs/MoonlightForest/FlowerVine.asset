@@ -1,0 +1,114 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-2644191990006657063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91920887b2538cd47be0781dacec80c1, type: 3}
+  m_Name: Single Block Growth
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -72, y: -568}
+  ports:
+    keys:
+    - seeds
+    - origins
+    values:
+    - _fieldName: seeds
+      _node: {fileID: -2644191990006657063}
+      _typeQualifiedName: Matryoshka.RoadMap`1[[System.Collections.Generic.List`1[[Matryoshka.Seed,
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],
+        mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: origins
+      _node: {fileID: -2644191990006657063}
+      _typeQualifiedName: Matryoshka.RoadMap`1[[System.Collections.Generic.List`1[[Matryoshka.Seed,
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],
+        mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: root
+        node: {fileID: 6438844738699240919}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  origins:
+    val: []
+  seeds:
+    val: []
+  generateSeed: 1
+  generalDirection: {x: 0, y: 1, z: 0}
+  stepMin: 2
+  stepMax: 4
+  dircStrength: 0.65
+  connection: 0.4
+  block: 257694721
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7eb82fd9f9bd9e45b6ffdcbad879324, type: 3}
+  m_Name: FlowerVine
+  m_EditorClassIdentifier: 
+  nodes:
+  - {fileID: 6438844738699240919}
+  - {fileID: -2644191990006657063}
+  root: {fileID: 6438844738699240919}
+--- !u!114 &6438844738699240919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55a6071c27b24bc4189744290b2958df, type: 3}
+  m_Name: Root
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -328, y: -568}
+  ports:
+    keys:
+    - root
+    values:
+    - _fieldName: root
+      _node: {fileID: 6438844738699240919}
+      _typeQualifiedName: Matryoshka.RoadMap`1[[System.Collections.Generic.List`1[[Matryoshka.Seed,
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],
+        mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: origins
+        node: {fileID: -2644191990006657063}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  boundSize: {x: 32, y: 64, z: 32}
+  seedCenter: {x: 15, y: 5, z: 15}
+  rootPos: {x: 0, y: 0.65, z: 0}
+  rootNormal: {x: 0, y: 1, z: 0}
+  rootPowerMin: 1
+  rootPowerMax: 1
+  mustEmpty: 1
+  root:
+    val: []
