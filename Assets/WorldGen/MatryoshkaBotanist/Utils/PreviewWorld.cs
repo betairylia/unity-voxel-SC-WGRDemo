@@ -1,40 +1,44 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Voxelis.WorldGen;
 
-public class PreviewWorld : World
+namespace Voxelis
 {
-    public Matryoshka.MatryoshkaGraph graphForPreview;
-
-    protected override void SetWorld()
+    public class PreviewWorld : World
     {
-        // Setup generators
-        chunkGenerator = (ChunkGenerator)System.Activator.CreateInstance(generatorType);
-        UpdateMgr.Init(this, cs_generation, cs_generation_batchsize);
+        public Matryoshka.MatryoshkaGraph graphForPreview;
 
-        GenerateTestStructure();
-        worldGeneratingCoroutine = StartCoroutine(WorldUpdateCoroutine());
-    }
-
-    public void GenerateTestStructure()
-    {
-        Vector3Int origin = Vector3Int.zero + Vector3Int.up * 64;
-        BoundsInt b = this.graphForPreview.GetBounds(origin);
-        CustomJobs.CustomJob.TryAddJob(new WorldGen.GenericStructureGeneration(this, this.graphForPreview.NewGenerator(), b));
-    }
-
-    [ContextMenu("Refresh preview")]
-    public void Refresh()
-    {
-        if(CustomJobs.CustomJob.Count == 0)
+        protected override void SetWorld()
         {
-            // TODO: Do this more elegantly
-            ClearAllImmediate();
-            SetWorld();
+            // Setup generators
+            chunkGenerator = (ChunkGenerator)System.Activator.CreateInstance(generatorType);
+            GeometryIndependentPass.SetWorld(this);
+
+            GenerateTestStructure();
+            //worldGeneratingCoroutine = StartCoroutine(WorldUpdateCoroutine());
         }
-        else
+
+        public void GenerateTestStructure()
         {
-            Debug.LogError("Preview refresh failed - Unfinished job exists");
+            Vector3Int origin = Vector3Int.zero + Vector3Int.up * 64;
+            BoundsInt b = this.graphForPreview.GetBounds(origin);
+            CustomJobs.CustomJob.TryAddJob(new WorldGen.GenericStructureGeneration(this, this.graphForPreview.NewGenerator(), b));
+        }
+
+        [ContextMenu("Refresh preview")]
+        public void Refresh()
+        {
+            if (CustomJobs.CustomJob.Count == 0)
+            {
+                // TODO: Do this more elegantly
+                Globals.voxelisMain.Instance.Refresh();
+                SetWorld();
+            }
+            else
+            {
+                Debug.LogError("Preview refresh failed - Unfinished job exists");
+            }
         }
     }
 }

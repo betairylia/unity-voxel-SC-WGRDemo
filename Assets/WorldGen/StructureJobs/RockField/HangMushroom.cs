@@ -2,47 +2,50 @@
 using System.Collections;
 using System.Collections.Generic;
 
-// TODO: See StructureSeedPopulationPass.cs - will implement this later ...
-//public class HangMushroomJob : CustomJobs.MultipleChunkJob
-//{
-//    public HangMushroomJob(IEnumerable<Chunk> chunks) : base(chunks)
-//    {
-
-//    }
-
-//    protected override void OnExecute()
-//    {
-//        throw new System.NotImplementedException();
-//    }
-//}
-
-// Test purpose
-public class HangMushroom_test : IStructureGenerator
+namespace Voxelis.WorldGen
 {
-    public static System.Random random = new System.Random();
+    // TODO: See StructureSeedPopulationPass.cs - will implement this later ...
+    //public class HangMushroomJob : CustomJobs.MultipleChunkJob
+    //{
+    //    public HangMushroomJob(IEnumerable<Chunk> chunks) : base(chunks)
+    //    {
 
-    public void Generate(BoundsInt bound, World world)
+    //    }
+
+    //    protected override void OnExecute()
+    //    {
+    //        throw new System.NotImplementedException();
+    //    }
+    //}
+
+    // Test purpose
+    public class HangMushroom_test : IStructureGenerator
     {
-        Vector3Int root = bound.min + WorldGen.Consts.structureSeedGenerationSizes[(int)WorldGen.StructureType.HangMushroom].min;
-        int minLenth = 4;
-        int maxLenth = 18;
+        public static System.Random random = new System.Random();
 
-        for(int length = 1; length <= maxLenth; length++)
+        public void Generate(BoundsInt bound, World world)
         {
-            if(world.GetBlock(root + Vector3Int.down * length) > 0)
+            Vector3Int root = bound.min + WorldGen.Consts.structureSeedGenerationSizes[(int)WorldGen.StructureType.HangMushroom].min;
+            int minLenth = 4;
+            int maxLenth = 18;
+
+            for (int length = 1; length <= maxLenth; length++)
             {
-                maxLenth = length;
-                break;
+                if (world.GetBlock(root + Vector3Int.down * length).IsSolid())
+                {
+                    maxLenth = length;
+                    break;
+                }
             }
-        }
 
-        // Space too small, go back
-        if(maxLenth < minLenth) { return; }
+            // Space too small, go back
+            if (maxLenth < minLenth) { return; }
 
-        int len = random.Next(minLenth, maxLenth + 1);
-        for(int y = 1; y < len; y++)
-        {
-            world.SetBlock(root + Vector3Int.down * y, (uint)Blocks.glowingBlue);
+            int len = random.Next(minLenth, maxLenth + 1);
+            for (int y = 1; y < len; y++)
+            {
+                world.SetBlock(root + Vector3Int.down * y, Block.From32bitColor((uint)Blocks.glowingBlue));
+            }
         }
     }
 }

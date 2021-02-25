@@ -1,0 +1,315 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+#pragma kernel GetVertCount
+#include "../Data/Block.cginc"
+
+struct Vertex
+{
+    float3 position;
+    float3 normal;
+    float2 uv;
+    Block data;
+};
+
+StructuredBuffer<Block> chunkData;
+RWStructuredBuffer<unsigned int> indirectBuffer;
+RWStructuredBuffer<Vertex> vertexBuffer;
+
+inline void SetVert(uint3 id : SV_DispatchThreadID, int currPos, out int currIdx, out bool3 facePos, out bool3 faceNeg)
+{
+    // Count vertices number
+    int vCount = 0;
+    facePos = bool3(false, false, false);
+    faceNeg = bool3(false, false, false);
+
+    if (id.x <= 0)
+    {
+        faceNeg.x = true;
+        vCount += 6;
+    }
+    else if (!IsSolidRenderingBlock(chunkData[currPos - 32 * 32]))
+    {
+        faceNeg.x = true;
+        vCount += 6;
+    }
+
+    if (id.y <= 0)
+    {
+        faceNeg.y = true;
+        vCount += 6;
+    }
+    else if (!IsSolidRenderingBlock(chunkData[currPos - 32]))
+    {
+        faceNeg.y = true;
+        vCount += 6;
+    }
+
+    if (id.z <= 0)
+    {
+        faceNeg.z = true;
+        vCount += 6;
+    }
+    else if (!IsSolidRenderingBlock(chunkData[currPos - 1]))
+    {
+        faceNeg.z = true;
+        vCount += 6;
+    }
+
+    if (id.x >= 31)
+    {
+        facePos.x = true;
+        vCount += 6;
+    }
+    else if (!IsSolidRenderingBlock(chunkData[currPos + 32 * 32]))
+    {
+        facePos.x = true;
+        vCount += 6;
+    }
+
+    if (id.y >= 31)
+    {
+        facePos.y = true;
+        vCount += 6;
+    }
+    else if (!IsSolidRenderingBlock(chunkData[currPos + 32]))
+    {
+        facePos.y = true;
+        vCount += 6;
+    }
+
+    if (id.z >= 31)
+    {
+        facePos.z = true;
+        vCount += 6;
+    }
+    else if (!IsSolidRenderingBlock(chunkData[currPos + 1]))
+    {
+        facePos.z = true;
+        vCount += 6;
+    }
+
+    InterlockedAdd(indirectBuffer[0], vCount, currIdx);
+}
+
+[numthreads(8, 8, 8)]
+void GetVertCount (uint3 id : SV_DispatchThreadID)
+{
+    int currPos = id.x * 32 * 32 + id.y * 32 + id.z;
+    if (IsRenderableBlock(chunkData[currPos]))
+    {
+        bool3 facePos, faceNeg;
+        int i;
+        SetVert(id, currPos, i, facePos, faceNeg);
+    }
+}
+
+[numthreads(8, 8, 8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    int currPos = id.x * 32 * 32 + id.y * 32 + id.z;
+    if (IsRenderableBlock(chunkData[currPos]))
+    {
+        bool3 facePos, faceNeg;
+        int i;
+        SetVert(id, currPos, i, facePos, faceNeg);
+
+        float4 blockSize = float4(1.0, 1.0, 1.0, 0);
+        float3 blockOffset = float3(-0.05, -0.05, -0.05) + float3(id.x, id.y, id.z);
+
+        Vertex v;
+
+        v.data = chunkData[currPos];
+
+        // Left
+        if (faceNeg.x)
+        {
+            v.normal = float3(-1, 0, 0);
+
+            v.position = blockOffset;
+            v.uv = float2(0, 0);
+            vertexBuffer[i] = v;
+
+            v.position = blockOffset + blockSize.wwz;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 1] = v;
+
+            v.position = blockOffset + blockSize.wyw;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 2] = v;
+
+            v.position = blockOffset + blockSize.wyw;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 3] = v;
+
+            v.position = blockOffset + blockSize.wwz;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 4] = v;
+
+            v.position = blockOffset + blockSize.wyz;
+            v.uv = float2(1, 1);
+            vertexBuffer[i + 5] = v;
+
+            i += 6;
+        }
+
+        // Bottom
+        if (faceNeg.y)
+        {
+            v.normal = float3(-1, 0, 0);
+
+            v.position = blockOffset;
+            v.uv = float2(0, 0);
+            vertexBuffer[i] = v;
+
+            v.position = blockOffset + blockSize.xww;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 1] = v;
+
+            v.position = blockOffset + blockSize.wwz;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 2] = v;
+
+            v.position = blockOffset + blockSize.wwz;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 3] = v;
+
+            v.position = blockOffset + blockSize.xww;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 4] = v;
+
+            v.position = blockOffset + blockSize.xwz;
+            v.uv = float2(1, 1);
+            vertexBuffer[i + 5] = v;
+
+            i += 6;
+        }
+
+        // Back
+        if (faceNeg.z)
+        {
+            v.normal = float3(0, 0, -1);
+
+            v.position = blockOffset;
+            v.uv = float2(0, 0);
+            vertexBuffer[i] = v;
+
+            v.position = blockOffset + blockSize.wyw;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 1] = v;
+
+            v.position = blockOffset + blockSize.xww;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 2] = v;
+
+            v.position = blockOffset + blockSize.xww;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 3] = v;
+
+            v.position = blockOffset + blockSize.wyw;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 4] = v;
+
+            v.position = blockOffset + blockSize.xyw;
+            v.uv = float2(1, 1);
+            vertexBuffer[i + 5] = v;
+
+            i += 6;
+        }
+
+        // Right
+        if (facePos.x)
+        {
+            v.normal = float3(1, 0, 0);
+
+            v.position = blockOffset + blockSize.xww;
+            v.uv = float2(0, 0);
+            vertexBuffer[i] = v;
+
+            v.position = blockOffset + blockSize.xyw;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 1] = v;
+
+            v.position = blockOffset + blockSize.xwz;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 2] = v;
+
+            v.position = blockOffset + blockSize.xwz;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 3] = v;
+
+            v.position = blockOffset + blockSize.xyw;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 4] = v;
+
+            v.position = blockOffset + blockSize.xyz;
+            v.uv = float2(1, 1);
+            vertexBuffer[i + 5] = v;
+
+            i += 6;
+        }
+
+        // Top
+        if (facePos.y)
+        {
+            v.normal = float3(0, 1, 0);
+            
+            v.position = blockOffset + blockSize.wyw;
+            v.uv = float2(0, 0);
+            vertexBuffer[i] = v;
+            
+            v.position = blockOffset + blockSize.wyz;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 1] = v;
+            
+            v.position = blockOffset + blockSize.xyw;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 2] = v;
+            
+            v.position = blockOffset + blockSize.xyw;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 3] = v;
+            
+            v.position = blockOffset + blockSize.wyz;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 4] = v;
+            
+            v.position = blockOffset + blockSize.xyz;
+            v.uv = float2(1, 1);
+            vertexBuffer[i + 5] = v;
+
+            i += 6;
+        }
+
+        // Forward
+        if (facePos.z)
+        {
+            v.normal = float3(0, 0, 1);
+
+            v.position = blockOffset + blockSize.wwz;
+            v.uv = float2(0, 0);
+            vertexBuffer[i] = v;
+
+            v.position = blockOffset + blockSize.xwz;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 1] = v;
+
+            v.position = blockOffset + blockSize.wyz;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 2] = v;
+
+            v.position = blockOffset + blockSize.wyz;
+            v.uv = float2(1, 0);
+            vertexBuffer[i + 3] = v;
+
+            v.position = blockOffset + blockSize.xwz;
+            v.uv = float2(0, 1);
+            vertexBuffer[i + 4] = v;
+
+            v.position = blockOffset + blockSize.xyz;
+            v.uv = float2(1, 1);
+            vertexBuffer[i + 5] = v;
+
+            i += 6;
+        }
+    }
+}

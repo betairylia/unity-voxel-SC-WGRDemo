@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Jobs;
 
-namespace CustomJobs
+namespace Voxelis.CustomJobs
 {
     /// <summary>
     /// This will ensure that there will be no other jobs writing to the chunk when Execute() was called.
@@ -89,9 +89,9 @@ namespace CustomJobs
     /// </summary>
     public abstract class MultipleChunkJob : CustomJob
     {
-        protected IEnumerable<Chunk> chunks;
+        protected List<Chunk> chunks;
 
-        public MultipleChunkJob(IEnumerable<Chunk> chunks)
+        public MultipleChunkJob(List<Chunk> chunks)
         {
             this.chunks = chunks;
         }

@@ -9,12 +9,12 @@
 #include "includes/structures.cginc"
 
 StructuredBuffer<int> chkBuf;
-RWStructuredBuffer<unsigned int> blkBuf;
+RWStructuredBuffer<Block> blkBuf;
 AppendStructuredBuffer<StructureSeedDescriptor> structureBuf;
 
 // Eco1 = Dirt ground - dead trees should grow on top.
 // Eco2 = Sky bridge - hanged mushrooms should grow under bottom.
-float EvalGeometry(float3 pos, out float height, inout uint blk, out float eco1, out float eco2)
+float EvalGeometry(float3 pos, out float height, inout Block blk, out float eco1, out float eco2)
 {
     //float4 color = float4(0, 0, 0, 1); // ground color
     float4 color = lerp(float4(0.1, 0.1, 0.1, 1), float4(0.4, 0.4, 0.4, 1), clamp(fbm_4(pos / 3.0 + float3(1.2345, -6.1237, 0.1246)) * 1 + 0.5, 0, 1)); // rocky color
@@ -77,7 +77,8 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     int3 i_worldPos = int3(pos.x, pos.y, pos.z);
 
     float height;
-    uint blk = 0;
+    Block blk;
+    blk.data = 0x0;
 
     float eco1, eco2;
     float sdf = EvalGeometry(pos, height, blk, eco1, eco2);
@@ -90,7 +91,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     if (sdf <= 0)
     {
         float _f;
-        uint _u;
+        Block _u;
         float up = EvalGeometry(pos + float3(0, 1, 0), _f, _u, _f, _f); // somehow like the normal of the surface
         float down = EvalGeometry(pos - float3(0, 2, 0), _f, _u, _f, _f);
         //float down = -up; // Save time

@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿#define PROFILE
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -6,19 +8,25 @@ using Unity.Jobs;
 
 // TODO: use memory pools, maybe ?
 // TODO: now not using Unity's native job system's dependencies as we need to take care of GPU & mainthread. what should we do?
-namespace CustomJobs
+namespace Voxelis.CustomJobs
 {
     public abstract class CustomJob
     {
         public delegate void OnFinishCallback(CustomJob job);
+
+        // TODO: optimize this to avoid allocations
         public static LinkedList<CustomJob> scheduledJobs = new LinkedList<CustomJob>(); // Jobs that are currently active, running in CPU
+
+        // TODO: optimize this to avoid allocations
         public static Dictionary<CustomJob, CustomJob> queuedUniqueJobs = new Dictionary<CustomJob, CustomJob>(); // Unique Jobs that has registered, which may be run in the future
 
         public static int Count { get; private set; }
 
         public static void UpdateAllJobs()
         {
-            //Profiler.BeginSample($"CustomJobUpdate ({scheduledJobs.Count})");
+#if PROFILE
+            UnityEngine.Profiling.Profiler.BeginSample($"CustomJobUpdate ({scheduledJobs.Count})");
+#endif
             LinkedListNode<CustomJob> p = scheduledJobs.First;
             LinkedListNode<CustomJob> _p;
             while (p != null)
@@ -43,18 +51,26 @@ namespace CustomJobs
 
                 p = _p;
             }
-            //Profiler.EndSample();
+#if PROFILE
+            Profiler.EndSample();
+#endif
         }
 
         // Try to add a job to current queue. If the job is already presented, the existing job will be returned; If the job is already finished, null will be returned; otherwise the job itself will be returned.
         public static CustomJob TryAddJob(CustomJob job, OnFinishCallback finishCallback = null)
         {
+#if PROFILE
+            UnityEngine.Profiling.Profiler.BeginSample("CustomJob.TryAddJob");
+#endif
             if (job.isUnique)
             {
                 if (queuedUniqueJobs.ContainsKey(job))
                 {
                     //Debug.Log($"{job.ToString()} has already been queued.");
                     queuedUniqueJobs[job].finishCallback += finishCallback;
+#if PROFILE
+                    Profiler.EndSample();
+#endif
                     return queuedUniqueJobs[job];
                 }
 
@@ -63,6 +79,9 @@ namespace CustomJobs
                 if (job.AlreadyFinished())
                 {
                     job.OnFinish();
+#if PROFILE
+                    Profiler.EndSample();
+#endif
                     return null;
                 }
 
@@ -77,6 +96,10 @@ namespace CustomJobs
                 Count += 1;
                 job.Schedule();
             }
+
+#if PROFILE
+            Profiler.EndSample();
+#endif
 
             return job;
         }
@@ -93,7 +116,7 @@ namespace CustomJobs
         protected bool scheduled = false, finished = false;
         protected JobHandle jobHandle;
 
-        #region Uniqueness
+#region Uniqueness
         protected bool isUnique = true;
 
         public override string ToString()
@@ -148,7 +171,7 @@ namespace CustomJobs
             }
         }
 
-        #endregion
+#endregion
 
         public virtual void Depends(CustomJob dependency)
         {

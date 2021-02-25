@@ -1,15 +1,7 @@
 ﻿#ifndef UTILS
 #define UTILS
 
-// Convert a float4 color to uint ID
-unsigned int ToID(float4 color)
-{
-	return
-		((unsigned int)(clamp(color.r, 0, 1) * 255) << 24) +
-		((unsigned int)(clamp(color.g, 0, 1) * 255) << 16) +
-		((unsigned int)(clamp(color.b, 0, 1) * 255) << 8) +
-		((unsigned int)(clamp(color.a, 0, 1) * 255) << 0);
-}
+#include "../../../Voxelis/Data/Block.cginc"
 
 // IQ's smooth minium function. 
 float smin(float a, float b, float s) {

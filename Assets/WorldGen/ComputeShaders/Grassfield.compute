@@ -1,0 +1,61 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#include "includes/noise.cginc"
+#include "includes/utils.cginc"
+#include "includes/old_grid_ecosystem.cginc"
+#include "includes/structures.cginc"
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+StructuredBuffer<int> chkBuf;
+RWStructuredBuffer<Block> blkBuf;
+AppendStructuredBuffer<StructureSeedDescriptor> structureBuf;
+
+Texture2D<float4> Sketch;
+SamplerState samplerSketch;
+
+// HLSL
+
+[numthreads(8,8,8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	int chkID = id.x / 32;
+	int dest = chkID * 32768 + (id.x % 32) * 1024 + id.y * 32 + id.z; // index in blkBuf
+
+	float3 pos = float3(int(id.x % 32) + chkBuf[chkID * 3 + 0], int(id.y) + chkBuf[chkID * 3 + 1], int(id.z) + chkBuf[chkID * 3 + 2]);
+	int3 i_worldPos = int3(pos.x, pos.y, pos.z);
+
+	float height = fbm_4(pos.xz / 100.0);
+
+	if (pos.y < (height * 10.0 + 20.0))
+	{
+		//float4 moegi = float4(0.663, 0.820, 0.349, 1.000);
+		//float4 tokiwa = float4(0.000, 0.482, 0.286, 1.000);
+
+		float4 moegi = float4(0.545, 0.322, 0.631, 1.000);
+		float4 tokiwa= float4(0.271, 0.122, 0.286, 1.000);
+
+		blkBuf[dest] = ToID(lerp(moegi, tokiwa, height + 0.2 * fbm_4(pos)));
+
+		if (pos.y > (height * 10.0 + 19.0) && (hash12(pos.xz / 100.0) > 0.9998))
+		{
+			StructureSeedDescriptor desc;
+			desc.structureType = SU_MOONFOREST_TREE;
+			desc.worldPos = i_worldPos;
+			structureBuf.Append(desc);
+		}
+
+		if (pos.y > (height * 10.0 + 19.0) && (hash12(pos.xz / 100.0) < 0.001))
+		{
+			StructureSeedDescriptor desc;
+			desc.structureType = SU_MOONFOREST_FLOWER;
+			desc.worldPos = i_worldPos;
+			structureBuf.Append(desc);
+		}
+	}
+	else
+	{
+		blkBuf[dest].data = 0x00000000;
+	}
+}

@@ -1,0 +1,222 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7eb82fd9f9bd9e45b6ffdcbad879324, type: 3}
+  m_Name: New Matryoshka Graph
+  m_EditorClassIdentifier: 
+  nodes:
+  - {fileID: 4861552709005583278}
+  - {fileID: 5805068339136818309}
+  root: {fileID: 4861552709005583278}
+--- !u!114 &4861552709005583278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55a6071c27b24bc4189744290b2958df, type: 3}
+  m_Name: Root
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -264, y: -504}
+  ports:
+    keys:
+    - root
+    values:
+    - _fieldName: root
+      _node: {fileID: 4861552709005583278}
+      _typeQualifiedName: Matryoshka.RoadMap`1[[System.Collections.Generic.List`1[[Matryoshka.Seed,
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],
+        mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: origins
+        node: {fileID: 5805068339136818309}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  boundSize: {x: 64, y: 64, z: 64}
+  seedCenter: {x: 32, y: 10, z: 32}
+  rootPos: {x: 0, y: 0, z: 0}
+  rootNormal: {x: 0, y: 1, z: 0}
+  rootPowerMin: 1
+  rootPowerMax: 1
+  mustEmpty: 0
+  root:
+    val: []
+--- !u!114 &5805068339136818309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea6906dfe940f064289351eb9ae273e1, type: 3}
+  m_Name: Tree Branch
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: 56, y: -504}
+  ports:
+    keys:
+    - length
+    - rawStartRadius
+    - endRadiusScale
+    - seeds
+    - origins
+    values:
+    - _fieldName: length
+      _node: {fileID: 5805068339136818309}
+      _typeQualifiedName: Matryoshka.RoadMap`1[[System.Single, mscorlib, Version=4.0.0.0,
+        Culture=neutral, PublicKeyToken=b77a5c561934e089]], Assembly-CSharp, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: rawStartRadius
+      _node: {fileID: 5805068339136818309}
+      _typeQualifiedName: Matryoshka.RoadMap`1[[System.Single, mscorlib, Version=4.0.0.0,
+        Culture=neutral, PublicKeyToken=b77a5c561934e089]], Assembly-CSharp, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: endRadiusScale
+      _node: {fileID: 5805068339136818309}
+      _typeQualifiedName: Matryoshka.RoadMap`1[[System.Single, mscorlib, Version=4.0.0.0,
+        Culture=neutral, PublicKeyToken=b77a5c561934e089]], Assembly-CSharp, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: seeds
+      _node: {fileID: 5805068339136818309}
+      _typeQualifiedName: Matryoshka.RoadMap`1[[System.Collections.Generic.List`1[[Matryoshka.Seed,
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],
+        mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: origins
+      _node: {fileID: 5805068339136818309}
+      _typeQualifiedName: Matryoshka.RoadMap`1[[System.Collections.Generic.List`1[[Matryoshka.Seed,
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],
+        mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],
+        Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: root
+        node: {fileID: 4861552709005583278}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  origins:
+    val: []
+  seeds:
+    val: []
+  generateSeed: 1
+  nodes: 10
+  gravityConst:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  gravityAxis: {x: 0, y: -1, z: 0}
+  gravityLenthNormalized: 1.5
+  gravityNoiseAmpl: 1
+  gnarlConst:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  gnarlLenthNormalized: 2
+  gnarlNoiseAmpl: 0.2
+  rootScale: 1
+  noiseAmpl: 8
+  length:
+    val: 48
+  rawStartRadius:
+    val: 3
+  endRadiusScale:
+    val: 0.15
+  childStartSeg: 3
+  childEndSeg: 9
+  childGapSeg: 2
+  subSegSpread: 0.05
+  nChildrenPerGap: 3
+  childRate: 1
+  tiltStart: 55
+  tiltEnd: 30
+  tiltRand: 5
+  powerStart: 1
+  powerEnd: 0.65
+  powerRand: 0.1
+  childRotProgressionRand: 10
+  gapRotProgressionRand: 10
+  gapRotInit: 0
+  directChild: 0
+  childDirection: {x: 0, y: 1, z: 0}
+  childDirectionStrength: 1
+  block: 4278203391

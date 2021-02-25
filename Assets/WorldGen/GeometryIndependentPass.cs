@@ -3,9 +3,11 @@ using System.Collections;
 using Unity.Jobs;
 using System.Collections.Generic;
 using UnityEngine.Rendering;
+using System.Runtime.InteropServices;
 
-namespace WorldGen
+namespace Voxelis.WorldGen
 {
+    // TODO: generating independent blockGroups
     public class GeometryIndependentPass : CustomJobs.SingleChunkGPUJob
     {
         World world;
@@ -17,7 +19,7 @@ namespace WorldGen
             this.hash = 0x00000000 ^ chunk.positionOffset.x ^ chunk.positionOffset.y ^ chunk.positionOffset.z;
         }
 
-        public virtual void OnGPUFinish(Unity.Collections.NativeArray<uint> buf)
+        public virtual void OnGPUFinish(Unity.Collections.NativeArray<Block> buf)
         {
             chunk._geometry_pass_ok = true;
             base.OnGPUFinish();
@@ -55,6 +57,9 @@ namespace WorldGen
         static GeometryIndependentPass[] CSGenerationQueue_waitForReadback;
         static public ComputeShader cs_generation;
         static public int cs_generation_batchsize = 512;
+        static World def_world;
+
+        static bool inited = false;
 
         const int MAX_STRUCTURES_PER_CHUNK = 256;
 
@@ -77,19 +82,32 @@ namespace WorldGen
             CSGenerationQueue.AddLast(pass);
         }
 
-        public static void Init(World world)
+        public static void SetWorld(World world)
         {
+            Init();
+            def_world = world;
+
+            if(world.sketchMapTex != null)
+            {
+                cs_generation.SetTexture(0, "Sketch", world.sketchMapTex);
+            }
+        }
+
+        public static void Init()
+        {
+            if(inited) { return; }
+            inited = true;
+
             CSGenerationQueue = new LinkedList<GeometryIndependentPass>();
 
             csgen_chkBuf = new ComputeBuffer(cs_generation_batchsize * 3, sizeof(int)); // x, y, z for each chunk
-            csgen_blkBuf = new ComputeBuffer(cs_generation_batchsize * 32768, sizeof(uint)); // every block
+            csgen_blkBuf = new ComputeBuffer(cs_generation_batchsize * 32768, Marshal.SizeOf(typeof(Block))); // every block
             csgen_structureBuf = new ComputeBuffer(cs_generation_batchsize * MAX_STRUCTURES_PER_CHUNK, System.Runtime.InteropServices.Marshal.SizeOf(typeof(StructureSeedDescriptor)), ComputeBufferType.Append); // structure "seeds" slot for all chunks
             csgen_structureCountBuf = new ComputeBuffer(1, sizeof(int), ComputeBufferType.IndirectArguments);
 
             cs_generation.SetBuffer(0, "chkBuf", csgen_chkBuf);
             cs_generation.SetBuffer(0, "blkBuf", csgen_blkBuf);
             cs_generation.SetBuffer(0, "structureBuf", csgen_structureBuf);
-            cs_generation.SetTexture(0, "Sketch", world.sketchMapTex);
 
             blkBufOK = false;
             strBufOK = false;
@@ -164,7 +182,7 @@ namespace WorldGen
                 return;
             }
 
-            var result = request.GetData<uint>();
+            var result = request.GetData<Block>();
             for (int i = 0; i < cs_generation_batchsize; i++)
             {
                 if (CSGenerationQueue_waitForReadback[i] == null) { continue; }
@@ -233,8 +251,8 @@ namespace WorldGen
                 }
 
                 Vector3Int inner_pos;
-                Vector3Int chkCoord = Globals.world.Instance.GetChunkCoord(sd.worldPos, out inner_pos);
-                Globals.world.Instance.GetChunk(chkCoord, false)?.AddStructureSeed(sd);
+                Vector3Int chkCoord = def_world.GetChunkCoord(sd.worldPos, out inner_pos);
+                def_world.GetChunk(chkCoord, false)?.AddStructureSeed(sd);
 
                 //if(sd.structureType == StructureType.HangMushroom)
                 //{

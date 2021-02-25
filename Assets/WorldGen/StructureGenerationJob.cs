@@ -4,7 +4,7 @@ using Unity.Collections;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace WorldGen
+namespace Voxelis.WorldGen
 {
     // FIXME: Black magic in use
     // see https://qiita.com/tatsunoru/items/611d0378086dc5986249
@@ -78,6 +78,7 @@ namespace WorldGen
         public override void InitJob()
         {
             // World gen Structures must be generated after geometry passes
+            // TODO: Performance heavy; see https://stackoverflow.com/questions/18552669/memory-allocation-when-using-foreach-loops-in-c-sharp
             foreach (var chunk in chunks)
             {
                 if(chunk == null)
@@ -85,6 +86,7 @@ namespace WorldGen
                     Debug.Log("Catched");
                     continue;
                 }
+                // TODO: Pool this ...
                 this.Depends(TryAddJob(new GeometryIndependentPass(chunk, world)));
             }
         }

@@ -2,7 +2,7 @@
 using System.Collections;
 using Unity.Jobs;
 
-namespace CustomJobs
+namespace Voxelis.CustomJobs
 {
     public abstract class BatchedGPUComputeJob : CustomJob
     {

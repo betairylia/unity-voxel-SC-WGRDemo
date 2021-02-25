@@ -1,7 +1,10 @@
-﻿using System;
+﻿#define PROFILE
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Voxelis;
 
 [RequireComponent(typeof(Camera))]
 public class VoxelRayCast : MonoBehaviour
@@ -17,6 +20,9 @@ public class VoxelRayCast : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
+#if PROFILE
+        UnityEngine.Profiling.Profiler.BeginSample($"VoxelRayCast");
+#endif
         // RayCast for voxels
         Ray ray = GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         float maxDistance = 10.0f;
@@ -35,7 +41,7 @@ public class VoxelRayCast : MonoBehaviour
                 for (int z = minV.z; z <= maxV.z; z++)
                 {
                     Vector3Int p = new Vector3Int(x, y, z);
-                    if (world.GetBlock(p) == 0)
+                    if (!world.GetBlock(p).IsSolid()) // TODO: Selectable nonsolid blocks
                     {
                         continue;
                     }
@@ -87,6 +93,9 @@ public class VoxelRayCast : MonoBehaviour
             pointed.gameObject.SetActive(false);
             //next.gameObject.SetActive(false);
         }
+#if PROFILE
+        UnityEngine.Profiling.Profiler.EndSample();
+#endif
     }
 
     private void HandleInputs()
@@ -97,7 +106,7 @@ public class VoxelRayCast : MonoBehaviour
         }
         if(Input.GetMouseButtonDown(1))
         {
-            world.SetBlock(hit + dirc, handblock);
+            world.SetBlock(hit + dirc, Block.From32bitColor(handblock));
         }
     }
 }

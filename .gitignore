@@ -75,3 +75,6 @@ crashlytics-build.properties
 /_Jobs_backup_broken/
 /MagicaVoxelFiles/
 /Assets/Aura/Examples/
+
+/Profiles/
+/Substrate-master/

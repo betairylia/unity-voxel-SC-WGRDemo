@@ -5408,14 +5408,14 @@ MonoBehaviour:
   overrideColor: 1
   overridingColor: {r: 0.24617374, g: 0.7057454, b: 0.9999, a: 1}
   useShadow: 1
-  shadowMapRenderTexture: {fileID: 893727646}
+  shadowMapRenderTexture: {fileID: 2068888843}
   useCookie: 1
   cookieMapRenderTexture: {fileID: 0}
   enableOutOfPhaseColor: 0
   outOfPhaseColorStrength: 0.1
   outOfPhaseColor: {r: 0, g: 1, b: 1, a: 1}
   storeShadowDataShader: {fileID: 4800000, guid: fff19db2423616b4dbabe995cd97279e, type: 3}
-  shadowDataRenderTexture: {fileID: 1995836288}
+  shadowDataRenderTexture: {fileID: 789113173}
   customDistanceFalloffThreshold: 0.5
   customDistanceFalloffPower: 2
   storeDirectionalSpotLightCookieMapShader: {fileID: 4800000, guid: ffdac5434c39f7545b910c253007c8fc, type: 3}
@@ -5523,6 +5523,41 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 574917041}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!84 &789113173
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  serializedVersion: 3
+  m_Width: 32
+  m_Height: 1
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthFormat: 0
+  m_ColorFormat: 52
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1
 --- !u!1 &849049520
 GameObject:
   m_ObjectHideFlags: 0
@@ -5555,41 +5590,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!84 &893727646
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  serializedVersion: 3
-  m_Width: 512
-  m_Height: 512
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthFormat: 0
-  m_ColorFormat: 52
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 2
-  m_VolumeDepth: 1
 --- !u!1 &946593075
 GameObject:
   m_ObjectHideFlags: 0
@@ -5681,34 +5681,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 568b484a5dea0d743a15aa747f9d0367, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkRendererPrefab: {fileID: 264146620125322618, guid: cda24f9064784264db6fe7d95d751762, type: 3}
+  isFinite: 1
+  blockBound:
+    m_Position: {x: 0, y: 0, z: 0}
+    m_Size: {x: 0, y: 0, z: 0}
   showDistance: 400
   disappearDistance: 450
+  viewCull: 1
+  removeChunkInMemory: 0
+  globalSettings: {fileID: 11400000, guid: 9372d7f94dfbb3e40a48b83ed493a286, type: 2}
+  chunkMat: {fileID: 2100000, guid: e66655643f4e2b743b475b5d1f9d3ea0, type: 2}
+  cs_chunkMeshPopulator: {fileID: 7200000, guid: ca3754898db957849a31d1917b82d684, type: 3}
+  follows: {fileID: 1573151457}
+  mainCam: {fileID: 1573151456}
+  _worldUpdateStageStr:
+  - Build tasks
+  - Refresh renderables
+  startTime: 0
+  budgetMS: 15
   worldHeight: 8
   waterHeight: 5.8
-  removeChunkInMemory: 0
   worldSize: 1536
-  maxCoroutineSpendPerFrameMS: 10
   debugText: {fileID: 1973133806}
-  generatorType:
-    GuidAssignmentFailed: 0
-    _typeNameAndAssembly: CSGenerator, Assembly-CSharp
-    _GUID: 
-  sketcherType:
-    GuidAssignmentFailed: 0
-    _typeNameAndAssembly: WorldGen.WorldSketch.TerracedMountainsTest, Assembly-CSharp
-    _GUID: 5500ab0d37f95c9488e396cf86f537ed
-  chunkMat: {fileID: 2100000, guid: e66655643f4e2b743b475b5d1f9d3ea0, type: 2}
-  cs_chunkMeshPopulator: {fileID: 7200000, guid: 5234b2b768251754e8971dbfe2bfdf39, type: 3}
-  follows: {fileID: 1573151457}
   groundPlane: {fileID: 1283817114}
   capPlane: {fileID: 849049521}
   cs_generation: {fileID: 7200000, guid: bd752262c14400441a8a07c51073f09d, type: 3}
   cs_generation_batchsize: 512
-  mainCam: {fileID: 1573151456}
-  viewCull: 1
-  fog: 0
-  fogColor: {r: 0, g: 0, b: 0, a: 0}
   heightMap: []
   mapLen: 0
   erosion_cs: {fileID: 7200000, guid: 8a57f59a572859743ad1ebcc0d4fda2b, type: 3}
@@ -5728,6 +5726,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f9da32f627e87854196c8bcff6cf1297, type: 2}
   - {fileID: 11400000, guid: ac2cbfd8c9d7bfc43b60708c4ed50ea6, type: 2}
   - {fileID: 0}
+  isMainWorld: 1
+  generatorType:
+    GuidAssignmentFailed: 0
+    _typeNameAndAssembly: Voxelis.CSGenerator, Assembly-CSharp
+    _GUID: 
+  sketcherType:
+    GuidAssignmentFailed: 0
+    _typeNameAndAssembly: WorldGen.WorldSketch.TerracedMountainsTest, Assembly-CSharp
+    _GUID: 5500ab0d37f95c9488e396cf86f537ed
 --- !u!4 &1097455690
 Transform:
   m_ObjectHideFlags: 0
@@ -6146,6 +6153,7 @@ GameObject:
   - component: {fileID: 1573151458}
   - component: {fileID: 1573151453}
   - component: {fileID: 1573151452}
+  - component: {fileID: 1573151459}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -6359,6 +6367,25 @@ MonoBehaviour:
   postProcessShader: {fileID: 4800000, guid: 50255fa344dbd814c910fdafc5692b09, type: 3}
   blueNoiseTexturesArray: {fileID: 18700000, guid: 518b8337a0340444aa49dd0780efa9c2, type: 2}
   _hasBeenAssigned: 1
+--- !u!114 &1573151459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573151451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d68e18356c59ba4e996ff66c853f520, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cs_generation: {fileID: 7200000, guid: bd752262c14400441a8a07c51073f09d, type: 3}
+  cs_generation_batchsize: 512
+  globalSettings: {fileID: 11400000, guid: 9372d7f94dfbb3e40a48b83ed493a286, type: 2}
+  chunkMat: {fileID: 2100000, guid: e66655643f4e2b743b475b5d1f9d3ea0, type: 2}
+  cs_chunkMeshPopulator: {fileID: 7200000, guid: ca3754898db957849a31d1917b82d684, type: 3}
+  mainCam: {fileID: 1573151456}
+  UpdateCoroutineBudgetMS: 15
 --- !u!1 &1666315030
 GameObject:
   m_ObjectHideFlags: 0
@@ -6899,41 +6926,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!84 &1995836288
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  serializedVersion: 3
-  m_Width: 32
-  m_Height: 1
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthFormat: 0
-  m_ColorFormat: 52
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 2
-  m_VolumeDepth: 1
 --- !u!1 &2000986529
 GameObject:
   m_ObjectHideFlags: 0
@@ -7030,3 +7022,38 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2000986529}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!84 &2068888843
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  serializedVersion: 3
+  m_Width: 512
+  m_Height: 512
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthFormat: 0
+  m_ColorFormat: 52
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1

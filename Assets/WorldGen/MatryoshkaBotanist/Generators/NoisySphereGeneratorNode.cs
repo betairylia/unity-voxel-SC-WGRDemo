@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
+using Voxelis;
 using XNode;
 
 namespace Matryoshka.Generators
@@ -33,11 +34,11 @@ namespace Matryoshka.Generators
 						{
 							if (rand.NextDouble() < variantRate)
 							{
-								world.SetBlock(new Vector3Int(x, y, z), idVariant);
+								world.SetBlock(new Vector3Int(x, y, z), Block.From32bitColor(idVariant));
 							}
 							else
 							{
-								world.SetBlock(new Vector3Int(x, y, z), id);
+								world.SetBlock(new Vector3Int(x, y, z), Block.From32bitColor(id));
 							}
 						}
 					}

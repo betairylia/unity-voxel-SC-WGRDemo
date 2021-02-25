@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace WorldGen
+namespace Voxelis.WorldGen
 {
     public struct StructureSeedDescriptor
     {

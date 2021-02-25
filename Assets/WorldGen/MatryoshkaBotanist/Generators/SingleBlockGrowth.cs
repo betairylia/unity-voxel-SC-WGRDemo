@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Voxelis;
 using XNode;
 
 namespace Matryoshka.Generators
@@ -23,7 +24,7 @@ namespace Matryoshka.Generators
         public uint block;
         System.Random random;
 
-        List<KeyValuePair<Vector3Int, uint>> whereToGrowth = new List<KeyValuePair<Vector3Int, uint>>();
+        List<KeyValuePair<Vector3Int, Block>> whereToGrowth = new List<KeyValuePair<Vector3Int, Block>>();
 
         public override void Voxelize(World world)
         {
@@ -34,7 +35,7 @@ namespace Matryoshka.Generators
 
             foreach (var item in whereToGrowth)
             {
-                world.SetBlock(item.Key, random.NextDouble() < 0.02 ? 0x34bfb890 : item.Value);
+                world.SetBlock(item.Key, random.NextDouble() < 0.02 ? Block.From32bitColor(0x34bfb890) : item.Value);
             }
         }
 
@@ -66,7 +67,7 @@ namespace Matryoshka.Generators
                 maxScore = -1e5f;
 
                 // Get world data
-                uint[,,] blocks_cache = new uint[5,5,5];
+                Block[,,] blocks_cache = new Block[5,5,5];
                 foreach(var o in neighbor2.allPositionsWithin)
                 {
                     blocks_cache[o.x + 2, o.y + 2, o.z + 2] = world.GetBlock(pi + o);
@@ -78,7 +79,7 @@ namespace Matryoshka.Generators
                     float stepCost = stepCost_thisStep;
 
                     // Destination must be empty
-                    if (blocks_cache[offset.x + 2, offset.y + 2, offset.z + 2] > 0) 
+                    if (blocks_cache[offset.x + 2, offset.y + 2, offset.z + 2].IsSolid()) 
                     { 
                         continue; 
                     }
@@ -99,7 +100,7 @@ namespace Matryoshka.Generators
                     foreach (Vector3Int support_check in neighbor1.allPositionsWithin)
                     {
                         Vector3Int nn = support_check + offset;
-                        if(blocks_cache[nn.x + 2, nn.y + 2, nn.z + 2] > 0)
+                        if(blocks_cache[nn.x + 2, nn.y + 2, nn.z + 2].IsSolid())
                         {
                             score += 2.5f / 27.0f;
                             stepCost = stepCost * 0.7f;
@@ -126,7 +127,7 @@ namespace Matryoshka.Generators
 
                 // Grow along the selected direction
                 //world.SetBlock(pi, block);
-                whereToGrowth.Add(new KeyValuePair<Vector3Int, uint>(pi, block));
+                whereToGrowth.Add(new KeyValuePair<Vector3Int, Block>(pi, Block.From32bitColor(block)));
                 pi += nextDirc;
             }
 

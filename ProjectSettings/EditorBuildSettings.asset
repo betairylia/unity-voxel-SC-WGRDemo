@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/RockField_playground.unity
     guid: 725759f7150a0564f82364ae112fe423
+  - enabled: 0
+    path: Assets/Scenes/MCAWorldLoader.unity
+    guid: 8e554c1b31b0184458424a82c2553915
   m_configObjects: {}
