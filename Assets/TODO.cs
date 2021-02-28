@@ -13,6 +13,10 @@
  * [DONE] BlockGroups
  */
 
+/* ISSUES:
+ * BlockRegistryTable not saving the asset correctly, texture atlas lost when reopen project
+ */
+
 /* Profiling @ 2021-02-26, After switch from uint to ushort + ushort (Block)
  * Main bottleneck IS World Generation:
  *  CustomJob could be improved via pooling (Is LinkedList the best solution ?)

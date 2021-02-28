@@ -8,13 +8,13 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/AncientForest.unity
     guid: 8277b679c7a2d1947b0f613d917521f2
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MoonlightForest.unity
     guid: f8f7671f5b956fb4097153139e18358e
   - enabled: 0
     path: Assets/Scenes/RockField_playground.unity
     guid: 725759f7150a0564f82364ae112fe423
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/MCAWorldLoader.unity
     guid: 8e554c1b31b0184458424a82c2553915
   m_configObjects: {}

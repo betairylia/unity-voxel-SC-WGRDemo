@@ -20,11 +20,11 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
+  m_AmbientSkyColor: {r: 0.37254903, g: 0.41568628, b: 0.48235294, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 71f14a2d79f732f4d9893ef1b911f4ff, type: 2}
   m_HaloStrength: 0.5
@@ -157,14 +157,14 @@ MonoBehaviour:
   overrideColor: 1
   overridingColor: {r: 0.24617374, g: 0.7057454, b: 0.9999, a: 1}
   useShadow: 1
-  shadowMapRenderTexture: {fileID: 1523963139}
+  shadowMapRenderTexture: {fileID: 1856654453}
   useCookie: 1
   cookieMapRenderTexture: {fileID: 0}
   enableOutOfPhaseColor: 0
   outOfPhaseColorStrength: 0.1
   outOfPhaseColor: {r: 0, g: 1, b: 1, a: 1}
   storeShadowDataShader: {fileID: 4800000, guid: fff19db2423616b4dbabe995cd97279e, type: 3}
-  shadowDataRenderTexture: {fileID: 1583678791}
+  shadowDataRenderTexture: {fileID: 952452181}
   customDistanceFalloffThreshold: 0.5
   customDistanceFalloffPower: 2
   storeDirectionalSpotLightCookieMapShader: {fileID: 4800000, guid: ffdac5434c39f7545b910c253007c8fc, type: 3}
@@ -188,7 +188,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 0.9980877, g: 1, b: 0.9292453, a: 1}
-  m_Intensity: 1
+  m_Intensity: 0.95
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -197,7 +197,7 @@ Light:
     m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 0.85
+    m_Strength: 0.65
     m_Bias: 0.15
     m_NormalBias: 0
     m_NearPlane: 0.2
@@ -613,7 +613,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 0.514151, g: 0.84034413, b: 1, a: 1}
-  m_Intensity: 0.25
+  m_Intensity: 0.15
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -820,7 +820,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 0.9103774, g: 1, b: 0.91280764, a: 1}
-  m_Intensity: 0.2
+  m_Intensity: 0.1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -960,6 +960,7 @@ GameObject:
   - component: {fileID: 784261351}
   - component: {fileID: 784261350}
   - component: {fileID: 784261349}
+  - component: {fileID: 784261354}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1018,7 +1019,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 784261346}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 20, y: 160, z: 100}
+  m_LocalPosition: {x: 20, y: 90, z: 100}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2117533480}
@@ -1039,7 +1040,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointed: {fileID: 1895143037}
-  next: {fileID: 807801481}
   world: {fileID: 1697945050}
   handblock: 4294936678
 --- !u!114 &784261350
@@ -1173,6 +1173,25 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 784261346}
   m_Enabled: 1
+--- !u!114 &784261354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 784261346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d68e18356c59ba4e996ff66c853f520, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cs_generation: {fileID: 7200000, guid: 73ec859df639089429c05e9962961fb3, type: 3}
+  cs_generation_batchsize: 512
+  globalSettings: {fileID: 11400000, guid: 9372d7f94dfbb3e40a48b83ed493a286, type: 2}
+  chunkMat: {fileID: 2100000, guid: ad04e4b338b590f4fa981128755b2815, type: 2}
+  cs_chunkMeshPopulator: {fileID: 7200000, guid: d86aaf748e0f5e94cb9cce6cca3563ac, type: 3}
+  mainCam: {fileID: 784261347}
+  UpdateCoroutineBudgetMS: 15
 --- !u!1 &807801480
 GameObject:
   m_ObjectHideFlags: 0
@@ -1300,6 +1319,41 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!84 &952452181
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  serializedVersion: 3
+  m_Width: 32
+  m_Height: 1
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthFormat: 0
+  m_ColorFormat: 52
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1
 --- !u!1 &1296457835
 GameObject:
   m_ObjectHideFlags: 0
@@ -1375,76 +1429,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1296457835}
   m_CullTransparentMesh: 0
---- !u!84 &1523963139
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  serializedVersion: 3
-  m_Width: 512
-  m_Height: 512
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthFormat: 0
-  m_ColorFormat: 52
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 2
-  m_VolumeDepth: 1
---- !u!84 &1583678791
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  serializedVersion: 3
-  m_Width: 32
-  m_Height: 1
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthFormat: 0
-  m_ColorFormat: 52
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 2
-  m_VolumeDepth: 1
 --- !u!1 &1597982726
 GameObject:
   m_ObjectHideFlags: 0
@@ -1547,27 +1531,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4eb0f2346dbf00a4787017cc49a7d3e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkRendererPrefab: {fileID: 264146620125322618, guid: cda24f9064784264db6fe7d95d751762, type: 3}
-  showDistance: 300
-  disappearDistance: 360
-  worldHeight: 8
-  waterHeight: 10
+  isFinite: 1
+  blockBound:
+    m_Position: {x: 0, y: 0, z: 0}
+    m_Size: {x: 0, y: 0, z: 0}
+  showDistance: 64
+  disappearDistance: 96
+  viewCull: 1
   removeChunkInMemory: 0
-  worldSize: 1024
-  maxCoroutineSpendPerFrameMS: 10
-  debugText: {fileID: 1849757358}
   globalSettings: {fileID: 11400000, guid: 9372d7f94dfbb3e40a48b83ed493a286, type: 2}
   chunkMat: {fileID: 2100000, guid: e66655643f4e2b743b475b5d1f9d3ea0, type: 2}
   cs_chunkMeshPopulator: {fileID: 7200000, guid: ca3754898db957849a31d1917b82d684, type: 3}
   follows: {fileID: 784261348}
+  mainCam: {fileID: 784261347}
+  _worldUpdateStageStr:
+  - Build tasks
+  - Refresh renderables
+  startTime: 0
+  budgetMS: 15
+  worldHeight: 8
+  waterHeight: 10
+  worldSize: 1024
+  debugText: {fileID: 1849757358}
   groundPlane: {fileID: 1873956038}
   capPlane: {fileID: 926366246}
   cs_generation: {fileID: 7200000, guid: 73ec859df639089429c05e9962961fb3, type: 3}
   cs_generation_batchsize: 512
-  mainCam: {fileID: 784261347}
-  viewCull: 1
-  fog: 0
-  fogColor: {r: 0, g: 0, b: 0, a: 0}
   heightMap: []
   mapLen: 0
   erosion_cs: {fileID: 0}
@@ -1587,7 +1576,16 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  MCAPath: C:\Users\betairya\AppData\Roaming\.minecraft\saves\M1S11
+  isMainWorld: 1
+  generatorType:
+    GuidAssignmentFailed: 0
+    _typeNameAndAssembly: Voxelis.CSGenerator, Assembly-CSharp
+    _GUID: 
+  sketcherType:
+    GuidAssignmentFailed: 0
+    _typeNameAndAssembly: WorldGen.WorldSketch.TerracedMountainsTest, Assembly-CSharp
+    _GUID: 5500ab0d37f95c9488e396cf86f537ed
+  MCAPath: C:\Users\betairya\AppData\Roaming\.minecraft\saves\VoxelisTest
 --- !u!4 &1697945051
 Transform:
   m_ObjectHideFlags: 0
@@ -1620,7 +1618,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1740209464
 Transform:
   m_ObjectHideFlags: 0
@@ -1656,7 +1654,7 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1740209463}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 1
@@ -2076,6 +2074,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1849757356}
   m_CullTransparentMesh: 0
+--- !u!84 &1856654453
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  serializedVersion: 3
+  m_Width: 512
+  m_Height: 512
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthFormat: 0
+  m_ColorFormat: 52
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1
 --- !u!1 &1873956037
 GameObject:
   m_ObjectHideFlags: 0

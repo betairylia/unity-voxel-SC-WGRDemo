@@ -1,0 +1,3 @@
+[submodule "voxelis"]
+	path = Assets/Voxelis
+	url = https://github.com/betairylia/Voxelis.git

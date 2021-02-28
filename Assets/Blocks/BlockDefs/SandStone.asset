@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9abfd2480d8f464abd37996932c2a3e, type: 3}
+  m_Name: SandStone
+  m_EditorClassIdentifier: 
+  ID:
+    id: 24
+    meta: 0
+  texture: {fileID: 2800000, guid: 512d8d901f0d5da4dbcb952905f46373, type: 3}
+  doTint: 0
+  uvw: {x: 0, y: 0.078125, z: 0}
+  uvSize: {x: 0.0078125, y: 0.0078125}
+  geometryType: 0
+  isOpaque: 1
+  isSolid: 1
+  hasExtraData: 0
+  extraDataType:
+    GuidAssignmentFailed: 0
+    _typeNameAndAssembly: 
+    _GUID: 
