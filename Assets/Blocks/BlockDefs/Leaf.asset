@@ -17,13 +17,13 @@ MonoBehaviour:
     meta: 0
   texture: {fileID: 2800000, guid: c0d151ae9ac90d64f8c0dbb33922fb50, type: 3}
   doTint: 1
-  uvw: {x: 0.25, y: 0.5, z: 0}
-  uvSize: {x: 0.25, y: 0.25}
-  geometryType: 0
-  isOpaque: 1
-  isSolid: 1
-  hasExtraData: 0
+  uvw: {x: 0, y: 0.0703125, z: 0}
+  uvSize: {x: 0.0078125, y: 0.0078125}
+  geometryType: 4
+  isOpaque: 0
+  isSolid: 0
+  hasExtraData: 1
   extraDataType:
     GuidAssignmentFailed: 0
-    _typeNameAndAssembly: 
-    _GUID: 
+    _typeNameAndAssembly: Voxelis.BlockExtras.FineStructure_16, Assembly-CSharp
+    _GUID: bbdfbc97db7f4434bb04dc5df74989e9
