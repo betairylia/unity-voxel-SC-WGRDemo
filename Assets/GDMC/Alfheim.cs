@@ -166,25 +166,25 @@ namespace GDMC
 
         #region SuperGrid visualization helpers
 
-        public static readonly ushort[] gridColor = new ushort[6]
+        public static readonly uint[] gridColor = new uint[6]
         {
             // Empty
-            0x0000,
+            0x00000000,
 
             // Support
-            0x00ff,
+            0x0000ffff,
 
             // SolidNature
-            0x0f0f,
+            0x00ff00f,
 
             // Road
-            0x999f,
+            0x999999ff,
 
             // Building
-            0xf00f,
+            0xff0000ff,
 
             // Roof
-            0xf0ff
+            0xff00ffff
         };
 
         protected void DEBUG_ShowSuperGrid()
@@ -198,13 +198,12 @@ namespace GDMC
                 {
                     SetBlock(bound.size - gridSize + p, new Block
                     {
-                        id = bid,
-                        meta = (ushort)((Mathf.Clamp((int)((Vector3.Dot(sg.groundNormal, Vector3.up) + 0.0f) * 16.0f), 0, 15) << 8) + 0x000f)
+                        id = bid * (uint)((Mathf.Clamp((int)((Vector3.Dot(sg.groundNormal, Vector3.up) + 0.0f) * 256.0f), 0, 255) << 16) + 0xff)
                     });
                 }
                 else
                 {
-                    SetBlock(bound.size - gridSize + p, new Block { id = bid, meta = gridColor[(int)sg.type] });
+                    SetBlock(bound.size - gridSize + p, new Block { id = bid * gridColor[(int)sg.type] });
                 }
             }
         }
@@ -329,12 +328,12 @@ namespace GDMC
 #if DO_VISUALIZATION
             #region Visualize
 
-            blockSet.Add(' ', new Block { id = 0xffff, meta = 0x9d6f });
-            blockSet.Add('*', new Block { id = 0x0000, meta = 0x0000 }); // Air
-            blockSet.Add('o', new Block { id = 0xffff, meta = 0x07ff });
-            blockSet.Add('r', new Block { id = 0xffff, meta = 0xf00f });
-            blockSet.Add('g', new Block { id = 0xffff, meta = 0x0f0f });
-            blockSet.Add('b', new Block { id = 0x0000, meta = 0x0000 }); // Air (Preserved)
+            blockSet.Add(' ', new Block { id = 0x99dd66ff });
+            blockSet.Add('*', new Block { id = 0x00000000 }); // Air
+            blockSet.Add('o', new Block { id = 0x0077ffff });
+            blockSet.Add('r', new Block { id = 0xff0000ff });
+            blockSet.Add('g', new Block { id = 0x00ff00ff });
+            blockSet.Add('b', new Block { id = 0x00000000 }); // Air (Preserved)
 
             foreach (var p in gridBound.allPositionsWithin)
             {

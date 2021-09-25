@@ -546,12 +546,12 @@ namespace GDMC.MCMC
 
         public void SetupBlocks()
         {
-            blockSet.Add(' ', new Block { id = 0xffff, meta = 0x000f });
-            blockSet.Add('*', new Block { id = 0xffff, meta = 0xffff });
-            blockSet.Add('o', new Block { id = 0xffff, meta = 0x07ff });
-            blockSet.Add('r', new Block { id = 0xffff, meta = 0xf00f });
-            blockSet.Add('g', new Block { id = 0xffff, meta = 0x0f0f });
-            blockSet.Add('b', new Block { id = 0xffff, meta = 0x00ff });
+            blockSet.Add(' ', new Block { id = 0x000000ff });
+            blockSet.Add('*', new Block { id = 0xffffffff });
+            blockSet.Add('o', new Block { id = 0x0077ffff });
+            blockSet.Add('r', new Block { id = 0xff0000ff });
+            blockSet.Add('g', new Block { id = 0x00ff00ff });
+            blockSet.Add('b', new Block { id = 0x0000ffff });
         }
 
         public void Init(object instance)
@@ -580,11 +580,11 @@ namespace GDMC.MCMC
                 for (int y = 0; y < bound.size.z; y++)
                 {
                     uint val = (uint)(instance_n.connectivityMap[x * bound.size.z + y].distance);
-                    val = val & 0xffff;
+                    val = val & 0xffffffff;
 
                     world.SetBlock(
                         new Vector3Int(x + bound.min.x, bound.max.y - 1, y + bound.min.z),
-                        new Block { id = 0xFFFF, meta = (ushort)(((ushort)val << 4) | 0x000f) }
+                        new Block { id = (uint)(((uint)val << 8) | 0xff) }
                     );
                 }
 
@@ -602,11 +602,11 @@ namespace GDMC.MCMC
                 {
                     uint val = (uint)(instance_n.connectivityMap[x * bound.size.z + y].distance);
                     //uint val = (uint)instance_n.blockConnectivities[instance_n.map[x, y]];
-                    val = val & 0xffff;
+                    val = val & 0xffffffff;
 
                     world.SetBlock(
                         new Vector3Int(x + bound.min.x, bound.max.y - 1, y + bound.min.z),
-                        new Block { id = 0xFFFF, meta = (ushort)(((ushort)val << 4) | 0x000f) }
+                        new Block { id = (uint)(((uint)val << 8) | 0xff) }
                     );
 
                     //world.SetBlock(new Vector3Int(x + bound.min.x, bound.max.y - 1, y + bound.min.z), blockSet[instance_n.map[x, y]]);
@@ -622,8 +622,8 @@ namespace GDMC.MCMC
                 foreach (var m in ms)
                 {
                     uint val = (uint)(instance_n.connectivityMap[m.x * bound.size.z + m.y].distance);
-                    val = val & 0xffff;
-                    Block b = new Block { id = 0xFFFF, meta = (ushort)(((ushort)val << 4) | 0x000f) };
+                    val = val & 0xffffffff;
+                    Block b = new Block { id = (uint)(((uint)val << 8) | 0xff) };
 
                     if(renderMode == RenderMode.Connectivity)
                     {
