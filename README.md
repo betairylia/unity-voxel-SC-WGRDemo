@@ -3,6 +3,8 @@ Please do `git clone --recurse-submodules` as the project contains submodules.
 
 or `git submodule update --init --recursive` after cloned.
 
+Unity version: 2021.1.11
+
 ------
 
 Unity playground for voxel world generation / rendering.  
