@@ -1,4 +1,10 @@
 # SC-WGRDemo
+Please do `git clone --recurse-submodules` as the project contains submodules.
+
+or `git submodule update --init --recursive` after cloned.
+
+------
+
 Unity playground for voxel world generation / rendering.  
 (Early development xD)
 
