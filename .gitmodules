@@ -1,3 +1,6 @@
 [submodule "voxelis"]
 	path = Assets/Voxelis
 	url = https://github.com/betairylia/Voxelis.git
+[submodule "Assets/VoxReader"]
+	path = Assets/VoxReader
+	url = https://github.com/sandrofigo/VoxReader.git

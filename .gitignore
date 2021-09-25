@@ -78,3 +78,7 @@ crashlytics-build.properties
 
 /Profiles/
 /Substrate-master/
+/Assets/UnitySVO/
+ChunkMeshUtils/
+ExportedMeshes/
+*.7z

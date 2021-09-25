@@ -1,7 +1,6 @@
 ﻿/* TODO list:
  * Non-seed input ports for Matryoshka
  * Optimize ChunkRenderer for #vert batched readback
- * Load presets from MagicaVoxel
  * Animals
  * LOD
  * Optimized mesh generation on HOST
@@ -11,6 +10,8 @@
  * 
  * [DONE] Switch blocks from uint into structs
  * [DONE] BlockGroups
+ * [DONE] Load from MagicaVoxel
+ * [DONE] Fine Structure 16
  */
 
 /* ISSUES:
