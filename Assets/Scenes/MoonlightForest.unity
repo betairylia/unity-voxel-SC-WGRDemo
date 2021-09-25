@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 532611855}
-  m_IndirectSpecularColor: {r: 0.011919215, g: 0.024279088, b: 0.05520928, a: 1}
+  m_IndirectSpecularColor: {r: 0.02700755, g: 0.05501765, b: 0.12508678, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5765,11 +5765,11 @@ MonoBehaviour:
   waterHeight: 5.8
   worldSize: 1536
   debugText: {fileID: 1973133806}
+  sketcher: {fileID: 11400000, guid: 4478d558207ef1a49b181f75b94dfbd2, type: 2}
   groundPlane: {fileID: 1283817114}
   capPlane: {fileID: 849049521}
   cs_generation: {fileID: 7200000, guid: bd752262c14400441a8a07c51073f09d, type: 3}
   cs_generation_batchsize: 512
-  heightMap: []
   mapLen: 0
   erosion_cs: {fileID: 7200000, guid: 8a57f59a572859743ad1ebcc0d4fda2b, type: 3}
   sketchMapTex: {fileID: 10300, guid: 0000000000000000f000000000000000, type: 0}
@@ -5786,17 +5786,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 77eda8ca61c41074992f0bd1ffb9b610, type: 2}
   - {fileID: 11400000, guid: 1612129cd6e2a1843a6715b882e538fb, type: 2}
   - {fileID: 11400000, guid: f9da32f627e87854196c8bcff6cf1297, type: 2}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: ac2cbfd8c9d7bfc43b60708c4ed50ea6, type: 2}
   - {fileID: 0}
   isMainWorld: 1
   generatorType:
     GuidAssignmentFailed: 0
     _typeNameAndAssembly: Voxelis.CSGenerator, Assembly-CSharp
     _GUID: 
-  sketcherType:
-    GuidAssignmentFailed: 0
-    _typeNameAndAssembly: WorldGen.WorldSketch.TerracedMountainsTest, Assembly-CSharp
-    _GUID: 5500ab0d37f95c9488e396cf86f537ed
 --- !u!4 &1097455690
 Transform:
   m_ObjectHideFlags: 0
