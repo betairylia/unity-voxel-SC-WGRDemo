@@ -5,10 +5,16 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Loader.unity
+    guid: 6d0e854e039768043ae8c23b2154c858
+  - enabled: 1
+    path: Assets/Scenes/HeavenLitForest.unity
+    guid: e71752176f4368743962de87d3c59f03
   - enabled: 0
     path: Assets/Scenes/Legacy/AncientForest.unity
     guid: 8277b679c7a2d1947b0f613d917521f2
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Legacy/MoonlightForest.unity
     guid: f8f7671f5b956fb4097153139e18358e
   - enabled: 0

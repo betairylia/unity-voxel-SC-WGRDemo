@@ -17,8 +17,8 @@ Texture2D<float4> Sketch;
 SamplerState samplerSketch;
 
 static const float erosionStrength = 20.0f;
-static const float sketchSize = 256.0f;
-static const float sketchScale = 4.0f;
+static const float sketchSize = 1024.0f;
+static const float sketchScale = 2.0f;
 
 static const float4 bDirt = float4(0.729, 0.518, 0.282, 1);
 static const float4 bRock = float4(0.467, 0.471, 0.482, 1);
@@ -47,6 +47,9 @@ float4 SampleGaussianBlur(float2 uv, float2 radius, Texture2D<float4> tex, Sampl
 
 float EvalGeometry(float3 pos, out float height, inout Block blk, out float dRiver)
 {
+    float waterMin = 0.0006;
+    float waterMax = 0.004;
+
     /////////////////////// Height map & Apply sketch
     //float4 color = float4(0, 0, 0, 1); // ground color
     float4 color = lerp(float4(0.427, 0.514, 0.275, 1), float4(0.0, 0.349, 0.192, 1), clamp(fbm_4(pos / 1.8 + float3(1.2345, -6.1237, 0.1246)) * 1 + 0.5, 0, 1)); // ground color, blueish - grassy
@@ -54,7 +57,7 @@ float EvalGeometry(float3 pos, out float height, inout Block blk, out float dRiv
     //height = fbm_9(pos.xz / 100.0) * 0.5 + 0.5; // 0 ~ 1
     //height = sketch[float2(0.5, 0.8)].r;
     float4 sketch = Sketch.SampleLevel(samplerSketch, (pos.xz / (sketchSize * sketchScale)) + 0.5f, 0);
-    float water = smoothstep(0.0025, 0.005, sketch.b);
+    float water = smoothstep(waterMin, waterMax, sketch.b);
     height = sketch.r;
 
     // Apply paths
@@ -105,7 +108,7 @@ float EvalGeometry(float3 pos, out float height, inout Block blk, out float dRiv
     float4 rockColor = lerp(float4(0.15, 0.15, 0.15, 1), float4(0.282, 0.486, 0.220, 1), pow(clamp(fbm_4(pos / 1.4 + float3(1.2345, -6.1237, 0.1246)) * 1 + 0.5, 0, 1), 2.5)); // moss rock color
 
     // Where to put rock (edge of river * some noise mask)
-    float riverBankRockProp = smoothstep(-0.001, 0.0, -abs(sketch.b - 0.0031)) * smoothstep(-0.1, 0.1, fbm_4((pos.xz + 3.5) / 40.0));
+    float riverBankRockProp = smoothstep(-0.0015, 0.0, -abs(sketch.b - waterMin - 0.0005)) * smoothstep(-0.1, 0.1, fbm_4((pos.xz + 3.5) / 40.0));
 
     // Get "push out" part (<0) of the rock noise and add it to current terrain with colors
     float riverBankRock = smin((riverBankRockProp * fbm_4(pos / 6.0) + 0.05) * 8.0, 0.0, 0.02, rockColor, color, color);

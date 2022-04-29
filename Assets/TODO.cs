@@ -24,3 +24,5 @@
  *  GeometryIndependentPass (CustomJob) should be pooled
  *  DON'T rebuild Matryoshka Graph everytime a StructureGenerator is generated ...
  */
+
+// https://docs.unity3d.com/ScriptReference/Build.IPreprocessBuildWithReport.OnPreprocessBuild.html

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 532611855}
-  m_IndirectSpecularColor: {r: 9491.68, g: 11287.4375, b: 13344.852, a: 1}
+  m_IndirectSpecularColor: {r: 9492.23, g: 11287.625, b: 13345.305, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5393,13 +5393,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 532611854}
-  m_LocalRotation: {x: 0.63368016, y: -0.25050452, z: 0.71159196, w: 0.17127122}
+  m_LocalRotation: {x: 0.31043985, y: -0.67238736, z: 0.5241592, w: 0.42045155}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 35, y: 85, z: 185.164}
+  m_LocalEulerAnglesHint: {x: 105, y: 68, z: 185.164}
 --- !u!114 &532611857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5724,6 +5724,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1097455690}
   - component: {fileID: 1097455689}
+  - component: {fileID: 1097455691}
+  - component: {fileID: 1097455692}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -5763,7 +5765,7 @@ MonoBehaviour:
   budgetMS: 15
   worldHeight: 8
   waterHeight: 5.8
-  worldSize: 511
+  worldSize: 1536
   debugText: {fileID: 1973133806}
   groundPlane: {fileID: 1283817114}
   capPlane: {fileID: 849049521}
@@ -5776,23 +5778,7 @@ MonoBehaviour:
   showSketchMesh: 0
   sketchMeshMat: {fileID: 2100000, guid: 8b30e0e12ce15624293b2e03f8cc2b8c, type: 2}
   isMainWorld: 1
-  sketcher: {fileID: 11400000, guid: 99aac52edcaae7041b24212031800dc0, type: 2}
-  generatorType:
-    GuidAssignmentFailed: 0
-    _typeNameAndAssembly: Voxelis.CSGenerator, Assembly-CSharp
-    _GUID: 
-  cs_generation: {fileID: 7200000, guid: 3eeb2762660fd3246b4ac588ca4473a1, type: 3}
-  cs_generation_batchsize: 512
-  matryoshkaGraph: {fileID: 0}
-  structureGraphs:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 11400000, guid: cd8a4b6c73b11084792d5e6b2bc32b9d, type: 2}
-  - {fileID: 11400000, guid: 1612129cd6e2a1843a6715b882e538fb, type: 2}
-  - {fileID: 11400000, guid: f9da32f627e87854196c8bcff6cf1297, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
+  worldGenDef: {fileID: 11400000, guid: e3d7b3b8568fd7542af03d6d5c82abe5, type: 2}
 --- !u!4 &1097455690
 Transform:
   m_ObjectHideFlags: 0
@@ -5807,6 +5793,31 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1097455691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1097455688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10b2837cb06703f4aaac2d5fabfb5b0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1097455692
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1097455688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4a133a21f5af224daa356a84f733e27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  world: {fileID: 1097455689}
 --- !u!1 &1124202452
 GameObject:
   m_ObjectHideFlags: 0
@@ -6238,7 +6249,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1573151451}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 20, y: 160, z: 100}
+  m_LocalPosition: {x: 0, y: 120, z: -100}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 311911255}
@@ -6290,11 +6301,11 @@ MonoBehaviour:
   SMAAQuality: 2
   dithering: 0
   stopNaNs: 0
-  taaSharpenStrength: 0.5
+  taaSharpenStrength: 0.2
   TAAQuality: 2
   taaHistorySharpening: 0.35
   taaAntiFlicker: 0.5
-  taaMotionVectorRejection: 0
+  taaMotionVectorRejection: 0.1
   taaAntiHistoryRinging: 0
   physicalParameters:
     m_Iso: 200

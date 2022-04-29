@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11dd6fc15b787e4488d6ad4cb51df97f, type: 3}
+  m_Name: Flat Grids
+  m_EditorClassIdentifier: 
+  sketcher: {fileID: 11400000, guid: 097e8ecbbdfe95047bf26ed632d0c3de, type: 2}
+  worldSketchSize: 16
+  cs_generation: {fileID: 7200000, guid: 73ec859df639089429c05e9962961fb3, type: 3}
+  cs_generation_batchsize: 512
+  matryoshkaGraph: {fileID: 0}
+  structureGraphs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 11400000, guid: cd8a4b6c73b11084792d5e6b2bc32b9d, type: 2}
+  - {fileID: 11400000, guid: 1612129cd6e2a1843a6715b882e538fb, type: 2}
+  - {fileID: 11400000, guid: f9da32f627e87854196c8bcff6cf1297, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}

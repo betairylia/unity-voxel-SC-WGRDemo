@@ -4,3 +4,6 @@
 [submodule "Assets/VoxReader"]
 	path = Assets/VoxReader
 	url = https://github.com/sandrofigo/VoxReader.git
+[submodule "Python/AlfheimMCMC/npvox"]
+	path = Python/AlfheimMCMC/npvox
+	url = https://github.com/alexhunsley/numpy-vox-io.git
