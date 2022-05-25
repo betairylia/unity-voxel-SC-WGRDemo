@@ -243,3 +243,4 @@ ExportedMeshes/
 Manifest.toml
 
 *.mstate
+/Julia/statprof/

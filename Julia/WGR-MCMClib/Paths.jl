@@ -1,6 +1,7 @@
 # module Alfheim
 
 using DataStructures
+using InteractiveUtils
 
 const Up = 1
 const Down = 2
@@ -503,7 +504,7 @@ Paths(c, s, checks, minB::Vector{Int}, maxB::Vector{Int}, dist::Array{Int}, dirc
 function (e::Paths)(s)
     e.maxBounds = e.maxBounds .- size(s.voxels)
     e.visited = zeros(Bool, size(s.voxels)...)
-    BFSbad!(e.state.dist, e.state.dirc, s.voxels, e.cost, e.starts, e.visited; minB = e.minBounds, maxBFromBoundary = e.maxBounds, checkOrder = e.checks)
+    BFS!(e.state.dist, e.state.dirc, s.voxels, e.cost, e.starts, e.visited; minB = e.minBounds, maxBFromBoundary = e.maxBounds, checkOrder = e.checks)
     distValid = e.state.dist[[i:j for (i,j) in zip(e.minBounds, size(s.voxels) .+ e.maxBounds)]...]
     # @show distValid
     sumDist = sum(distValid)

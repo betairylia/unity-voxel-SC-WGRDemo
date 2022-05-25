@@ -1,7 +1,7 @@
 module AlfheimG
 
 mutable struct Genome{T<:Integer}
-    g::Vector{T}
+    seq::Vector{T}
 end
 
 end # Module WGR

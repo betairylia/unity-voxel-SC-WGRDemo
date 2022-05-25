@@ -225,6 +225,72 @@ end
 # ENERGY FUNC
 
 ############################
+### Specific block propotion
+
+mutable struct BlockPropotionState <: AbstractEnergyState
+    blockCount::Int64
+    E::Float64
+end
+
+mutable struct BlockPropotion <: AbstractEnergy
+    # prevBlockCount::Vector{Int64}
+    
+    target::Float64
+    targetBlock::Block
+    numBlocksTotal::Int64
+    
+    # distribution difference function, p, q -> s \in \mathbb{R}
+    distDiff::Function
+    
+    state::BlockPropotionState
+    backupStates::Vector{BlockPropotionState}
+end
+
+const L2(p, q) = norm(p - q)
+function BlockPropotion(target, targetBlock)
+    return BlockPropotion(
+        target,
+        targetBlock,
+        0,
+        L2,
+        BlockPropotionState(0, 0),
+        []
+    )
+end
+
+function (e::BlockPropotion)(s)
+    
+    # Count number of each blocks
+    e.state.blockCount = sum(s.voxels .== e.targetBlock)
+    e.numBlocksTotal = length(s.voxels)
+    
+    # Calculate energy
+    e.state.E = e.distDiff(e.target, e.state.blockCount / e.numBlocksTotal)
+    
+    return e.state.E
+    
+end
+
+function preModification!(e::BlockPropotion, s, ds)
+    e.state.blockCount = sum(s.voxels .== e.targetBlock)
+    # TODO: Incremental updates
+    # for (p, b) in zip(ds.pos, ds.blk)
+    #     e.state.blockCount[s.voxels[p...]] -= 1
+    #     e.state.blockCount[b] += 1
+    # end
+end
+
+function postModification!(e::BlockPropotion, s, ds)
+    # Stright forward calculation
+    dE = e.distDiff(e.target, e.state.blockCount / e.numBlocksTotal) - e.state.E
+
+    # Cache previous E for rejects
+    e.state.E += dE
+    
+    return dE
+end
+
+############################
 ### Block Marginals
 
 mutable struct BlockMarginsState <: AbstractEnergyState
@@ -299,6 +365,11 @@ end
 # WALKERS
 
 walk(walker::AbstractWalker, s, ds) = walk(walker, s)
+
+mutable struct DummyWalker <: AbstractWalker
+    boundsMin::Vector{Int64}
+    boundsMax::Vector{Int64}
+end
 
 mutable struct RandomBlockProposal <: AbstractWalker
     dist::Categorical
