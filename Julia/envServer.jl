@@ -24,7 +24,7 @@ using ArgParse
 using Base.Threads
 
 # buf = WGR.BlockBuffer(32 * Threads.nthreads())
-buf = WGR.BlockBuffer(128)
+buf = WGR.BlockBuffer(4096)
 setBlocks(x,y,z,b) = WGR.setBlocks!(buf, x, y, z, b)
 flush() = WGR.flush!(buf)
 refreshNd(a,p,f = false) = WGR.refreshNd!(buf,a,p,f)
@@ -182,6 +182,7 @@ function main()
     while true
         socket = accept(server)
         @async begin
+            inVis = 0
             try
                 printfmt("Client $clientID connected.\n")
                 clientID += 1
@@ -190,6 +191,7 @@ function main()
                     total_num = read(socket, Int32)
                     # batch size
                     batch_size = read(socket, Int32)
+                    doVisualize = read(socket, Int32)
                     geneLenth = total_num ÷ batch_size
                     
                     print("Total size: $total_num\n")
@@ -221,23 +223,37 @@ function main()
                     print("\n")
                     
                     # Visualization in WGR
-                    if true
-                        print("Visualizing ...")
-                        row = convert(Int64, floor(sqrt(batch_size)))
-                        for ix in 1:length(pool)
-                            copiedmap = deepcopy(testmap)
-                            AlfheimG.populate!(pool[ix], copiedmap)
-                            refreshNd(
-                                bRep[copiedmap.map], 
-                                [
-                                       ((ix-1) % row) * (mapsize + 2*padding + 2), 
-                                    65, 
-                                    div((ix-1),  row) * (mapsize + 2*padding + 2)
-                                ], 
-                                true
-                            )
+                    if inVis == 0
+                        inVis = 1
+                        visPool = deepcopy(pool)
+                        @async begin
+                            try
+                                if doVisualize > 0
+                                    print("Visualizing ...")
+                                    row = convert(Int64, floor(sqrt(batch_size)))
+                                    for ix in 1:length(pool)
+                                        copiedmap = deepcopy(testmap)
+                                        AlfheimG.populate!(visPool[ix], copiedmap)
+                                        refreshNd(
+                                            bRep[copiedmap.map], 
+                                            [
+                                                   ((ix-1) % row) * (mapsize + 2*padding + 2), 
+                                                65, 
+                                                div((ix-1),  row) * (mapsize + 2*padding + 2)
+                                            ], 
+                                            true
+                                        )
+                                    end
+                                    print("Visualization done.\n")
+                                end
+                            catch e
+                                println("Visualization failed.", typeof(e))
+#                                 rethrow(e)
+                                @error "Error:" exception=(e, catch_backtrace())
+                            finally
+                                inVis = 0
+                            end
                         end
-                        print(" Done.\n")
                     end
                 end
             catch err

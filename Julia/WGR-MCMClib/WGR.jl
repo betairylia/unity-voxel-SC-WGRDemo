@@ -40,17 +40,22 @@ function GetBlockWithin(xMin, yMin, zMin, xMax, yMax, zMax)
 end
     
 function flush!(buffer::BlockBuffer)
-    # println("Flush")
-    reqText = ""
-    for b in 1:buffer.count
-        req = @sprintf "%d,%d,%d,%d\n" buffer.blks[b][1].x buffer.blks[b][1].y buffer.blks[b][1].z buffer.blks[b][2]
-        reqText *= req
-    end
-    # @show reqText
-    HTTP.request("POST", "http://$serverAddr/batched", [], reqText)
     
-    # Empty it
-    buffer.count = 0
+    try
+        # println("Flush")
+        reqText = ""
+        for b in 1:buffer.count
+            req = @sprintf "%d,%d,%d,%d\n" buffer.blks[b][1].x buffer.blks[b][1].y buffer.blks[b][1].z buffer.blks[b][2]
+            reqText *= req
+        end
+        # @show reqText
+        HTTP.request("POST", "http://$serverAddr/batched", [], reqText)
+    catch e
+        
+    finally    
+        # Empty it
+        buffer.count = 0
+    end
 end
 
 # function setBlocks!(buffer::BlockBuffer, x::Integer, y::Integer, z::Integer, block::Block)
@@ -91,7 +96,7 @@ function refreshNd!(buffer::BlockBuffer, arr, pos, full = false)
         end
     end
     
-    flush()
+    flush!(buffer)
 
 end
 
